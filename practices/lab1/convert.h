@@ -2,6 +2,7 @@
 #define CONVERT_H
 
 #include <stdlib.h>
+#include <assert.h>
 
 typedef struct Composition Composition;
 

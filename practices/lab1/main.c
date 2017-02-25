@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <list.h>
+#include <assert.h>
 
 #include <convert.h>
 #include <storage.h>
@@ -15,7 +16,10 @@ void List_print(List * list) {
 }
 
 int main(void) {
-	
+
+	int error = 1;
+	if (error) throw("Some error occured");
+
 	const char * fileName = "myalbum.txt";
 	List * compositions = Storage_load(fileName);
 
