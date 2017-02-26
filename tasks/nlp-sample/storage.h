@@ -1,11 +1,11 @@
 #ifndef STORAGE_H
 #define STORAGE_H
 
-#include <list.h>
+#include <numbers.h>
 
 /**
 **/
-List * Storage_loadNumbers(const char * fileName);
-void Storage_saveResult(const char * fileName, List * result);
+Sequence * Storage_loadNumbers(const char * fileName);
+void Storage_saveResult(const char * fileName, Sequence * result);
 
 #endif

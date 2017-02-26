@@ -3,36 +3,36 @@
 
 #include <stdio.h>
 
-static void __printListOfNumbers(List * list);
+static void __printSequenceOfNumbers(Sequence * list);
 
-List * Storage_loadNumbers(const char * fileName) {
+Sequence * Storage_loadNumbers(const char * fileName) {
 	/* this is a fake function implementation */
-	List * list = List_new();
-	List_add(list, Number_new(13, 10));
-	List_add(list, Number_new(6, 8));
-	List_add(list, Number_new(144, 10));
-	List_add(list, Number_new(14, 2));
-	List_add(list, Number_new(0, 10));
+	Sequence * list = Sequence_new();
+	Sequence_add(list, Number_new(13, 10));
+	Sequence_add(list, Number_new(6, 8));
+	Sequence_add(list, Number_new(144, 10));
+	Sequence_add(list, Number_new(14, 2));
+	Sequence_add(list, Number_new(0, 10));
 	printf("%s(%s):\n", __func__, fileName);
-	__printListOfNumbers(list);
+	__printSequenceOfNumbers(list);
 	return list;
 }
 
-void Storage_saveResult(const char * fileName, List * result) {
+void Storage_saveResult(const char * fileName, Sequence * result) {
 	/* this is a fake function implementation */
 	printf("%s(%s):\n", __func__, fileName);
-	__printListOfNumbers(result);
+	__printSequenceOfNumbers(result);
 }
 
 /**
 	private function for test console output 
 */
-static void __printListOfNumbers(List * list) {
-	int len = List_count(list);
+static void __printSequenceOfNumbers(Sequence * list) {
+	int len = Sequence_count(list);
 	char buffer[100] = "";
 	for(int i = 0; i < len; i++) {
-		Number * number = List_get(list, i);
-		printf("%s", Number_toString(number, buffer));
+		Number * number = Sequence_get(list, i);
+		printf("%s, ", Number_toString(number, buffer));
 	}
 	puts("");
 }

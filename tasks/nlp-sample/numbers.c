@@ -1,6 +1,7 @@
 #include <numbers.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <list.h>
 
 /* type implementation */
 struct Number {
@@ -36,6 +37,35 @@ int Number_getBase(Number * self) {
 }
 
 char * Number_toString(Number * self, char * buffer) {
-	sprintf(buffer, "%i (%i)", self->value, self->base);
+	sprintf(buffer, "%i(%i)", self->value, self->base);
 	return buffer;
+}
+
+struct Sequence {
+	List * numbers;
+};
+
+Sequence * Sequence_new(void) {
+	Sequence * self = malloc(sizeof(struct Sequence));
+	self->numbers = List_new();
+	return self;
+}
+
+void Sequence_free(Sequence ** selfPtr) {
+	Sequence * self = *selfPtr;
+	List_free(&self->numbers);
+	free(self);
+	*selfPtr = NULL;
+}
+
+void Sequence_add(Sequence * self, Number * number) {
+	List_add(self->numbers, number);
+}
+
+int Sequence_count(Sequence * self) {
+	return List_count(self->numbers);
+}
+
+Number * Sequence_get(Sequence * self, int index) {
+	return (Number *)List_get(self->numbers, index);
 }
