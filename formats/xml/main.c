@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -75,14 +76,16 @@ int writeXml(void) {
     xmlFreeDoc(doc);
 }
 
-void readAllText(const char * filename, char * text) {
+bool readAllText(const char * filename, char * text) {
 	char line[100];
     
     FILE * fr = fopen(filename, "r");
+	if (fr == NULL) return false;
     while(fgets(line, 100, fr)) {
         strcat(text, line);
     }
 	fclose(fr);
+	return true;
 }
 
 
@@ -125,8 +128,12 @@ int readXmlToStudents(const char * xmlStr, Student students[], int maxSize) {
 }
 
 int readXml(void) {
+	const char * inFile = "students.xml";
     char text[1000] = "";
-	readAllText("students.xml", text);
+	if (!readAllText(inFile, text)) {
+		printf("Error reading %s\n", inFile);
+		return 1;
+	}
 
     xmlDoc * xDoc = xmlReadMemory(text, strlen(text), NULL, NULL, 0);
     if (NULL == xDoc) {

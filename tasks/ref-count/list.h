@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <object.h>
 
 /**
     @typedef List
@@ -27,13 +28,13 @@ void List_free(List ** self);
     @param index - index of element
     @param ref - reference to memory where to write the value
 */
-void * List_get(List * self, int index);
+Object * List_get(List * self, int index);
 /**
     @brief List items setter
     @param index - index of element
     @param ref - reference to memory from where to read new value
 */
-void List_set(List * self, int index, void * ref);
+void List_set(List * self, int index, Object * ref);
 /**
     @brief adds new item to the end of List
     @param ref - reference to memory from where to read new value

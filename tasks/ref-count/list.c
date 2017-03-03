@@ -65,11 +65,13 @@ void * List_get(List * self, int index) {
     if (index < 0 || index >= self->size) throw("Index out of bounds");
     return self->items[index];
 }
+
 void List_set(List * self, int index, void * ref) {
     if (ref == NULL) throw("NULL reference");
     if (index < 0 || index >= self->size) throw("Index out of bounds");
     self->items[index] = ref;
 }
+
 void List_add(List * self, void * ref) {
     if (ref == NULL) throw("NULL reference");
     if (self->size <= self->capacity) {
@@ -77,6 +79,8 @@ void List_add(List * self, void * ref) {
     }
     List_set(self, self->size++, ref);
 }
+
+
 void List_insert(List * self, int index, void * ref) {
     if (ref == NULL) throw("NULL reference");
     if (index > self->size) throw("Argument out of range");
