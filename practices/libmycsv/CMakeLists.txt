@@ -14,7 +14,7 @@ file(GLOB SOURCES "src/*.c")
 
 # to build static lib
 # add_library(mycsv STATIC ${SOURCES})
-add_executable(mycsv "main.c" ${SOURCES})
+add_executable(${CMAKE_PROJECT_NAME} "main.c" ${SOURCES})
 
 # install library headers
 install(
@@ -24,7 +24,7 @@ install(
 
 #Set the location for library installation -- i.e., /usr/local/lib in this case
 # not really necessary in this example. Use "sudo make install" to apply
-install(TARGETS mycsv DESTINATION /usr/local/lib)
+install(TARGETS ${CMAKE_PROJECT_NAME}  DESTINATION /usr/local/lib)
 
 # uncomment this to link libxml2 XML library
 # target_link_libraries(proj libxml2.so)
