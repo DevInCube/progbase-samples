@@ -20,7 +20,7 @@ void CsvDoc_reset(CsvDoc * self);
 
 void CsvDoc_addRow(CsvDoc * self, CsvRow * row);
 
-const char * CsvRow_getRow(CsvRow * self);
+const char * CsvRow_getValue(CsvRow * self);
 bool CsvRow_moveNext(CsvRow * self);
 void CsvRow_reset(CsvRow * self);
 
