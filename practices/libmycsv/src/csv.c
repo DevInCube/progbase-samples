@@ -92,31 +92,37 @@ void CsvRow_addValue(CsvRow * self, const char * value) {
 
 //
 
+enum {
+	CSV_DELIMITER = ',',
+	CSV_EOLN = '\n',
+	CSV_EOF = '\0'
+};
+
 CsvDoc * CsvDoc_newFromFile(const char * filePath) { 
 	char text[1000] = "";
+	int textPos = 0;
 	if (Fs_readAllText(filePath, text)) {
 		CsvDoc * doc = CsvDoc_new();
 		CsvRow * row = CsvRow_new();
-		char ch = ' ';
+		char ch = '\0';
 		char buffer[100] = "";
-		int textPos = 0;
-		int pos = 0;
+		int wordPos = 0;
 		do {
 			ch = text[textPos++];
-			if (ch == '\n' || ch == ',' || ch == '\0') {
-				buffer[pos] = '\0';
-				pos = 0;
+			if (ch == CSV_DELIMITER || ch == CSV_EOLN || ch == CSV_EOF) {
+				buffer[wordPos] = '\0';
+				wordPos = 0;
 				CsvRow_addValue(row, buffer);
-				if (ch == '\n') {
+				if (ch == CSV_EOLN || ch == CSV_EOF) {
 					CsvDoc_addRow(doc, row);
-					row = CsvRow_new();
-				} else if (ch == '\0') {
-					CsvDoc_addRow(doc, row);
+					if (ch == CSV_EOLN) {
+						row = CsvRow_new();
+					}
 				}
 			} else {
-				buffer[pos++] = ch;
+				buffer[wordPos++] = ch;
 			}
-		} while (ch != '\0');
+		} while (ch != CSV_EOF);
 		return doc;
 	}
 	return NULL; 
@@ -124,8 +130,10 @@ CsvDoc * CsvDoc_newFromFile(const char * filePath) {
 
 void CsvDoc_writeToFile(CsvDoc * doc, const char * filePath) {
 	FILE * file = fopen(filePath, "w+");
+	CsvDoc_reset(doc);
 	while(CsvDoc_moveNext(doc)) {
 		CsvRow * row = CsvDoc_getRow(doc);
+		CsvRow_reset(row);
 		int i = 0;
 		while(CsvRow_moveNext(row)) {
 			if (i++ != 0) fprintf(file, ",");
