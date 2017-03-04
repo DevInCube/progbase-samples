@@ -13,7 +13,8 @@ include_directories(include)
 file(GLOB SOURCES "src/*.c")
 
 # to build static lib
-add_library(mycsv STATIC ${SOURCES})
+# add_library(mycsv STATIC ${SOURCES})
+add_executable(mycsv "main.c" ${SOURCES})
 
 # install library headers
 install(
