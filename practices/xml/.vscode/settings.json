@@ -1,0 +1,13 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+	"clang.cflags": [
+		"-I./include",
+		"-I./../include",
+		"-I/usr/include/libxml2",
+		"-c",
+		"-std=c11",
+		"-Werror",
+		"-Wall",
+		"-fms-extensions"
+	]
+}

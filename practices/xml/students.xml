@@ -1,0 +1,22 @@
+<students>
+    <student>
+        <name>Ruslan</name>
+        <surname>Hadyniak</surname>
+        <birthdate>1992-03-09</birthdate>
+        <year>2009</year>
+        <score>4.6</score>
+        <group name="KP-91">
+            <faculty>FPM</faculty>
+        </group>
+    </student>
+    <student>
+        <name>Tanya</name>
+        <surname>Anni</surname>
+        <birthdate>1992-09-09</birthdate>
+        <year>2016</year>
+        <score>3.3</score>
+        <group name="KP-71">
+            <faculty>FMM</faculty>
+        </group>
+    </student>
+</students>
