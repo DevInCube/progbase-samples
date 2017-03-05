@@ -1,15 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <list.h>
 #include <events.h>
 #include <progbase.h>
 #include <pbconsole.h>
 
-typedef void (*EventHandler)(Event * event, EventQueue * events);
-
 typedef struct KeyInputEvent KeyInputEvent;
 struct KeyInputEvent {
-	struct { Event; };  // -Wno-microsoft to disable this error
+	struct { Event; };
 	char keyCode; 
 };
 enum { KeyInputEventTypeId = 47578 };
@@ -37,11 +36,6 @@ RandomNumberEvent * RandomNumberEvent_new(int number) {
 	return self;
 }
 
-void RandomNumberEvent_free(RandomNumberEvent ** selfPtr) {
-	free(*selfPtr);
-	*selfPtr = NULL;
-}
-
 void RandomEventGen_update(Event * event, EventQueue * events);
 void InputManager_update(Event * event, EventQueue * events);
 void Event_handleEvent(Event * event, EventQueue * events);
@@ -51,12 +45,10 @@ enum { UpdateEventTypeId = 0 };
 int main(void) {
 	srand(time(NULL));
 
-	EventHandler handlers[] = {
-		RandomEventGen_update,
-		InputManager_update,
-		Event_handleEvent
-	};
-	int handlersLength = sizeof(handlers) / sizeof(handlers[0]);
+	List * handlers = List_new();
+	List_add(handlers, RandomEventGen_update);
+	List_add(handlers, InputManager_update);
+	List_add(handlers, Event_handleEvent);	
 	
 	EventQueue * eventList = EventQueue_new();
 	while (1) {
@@ -64,14 +56,16 @@ int main(void) {
 		EventQueue_enqueue(eventList, updateEvent);
 		while (EventQueue_size(eventList) > 0) {
 			Event * event = EventQueue_dequeue(eventList);
-			for (int i = 0; i < handlersLength; i++) {
-				handlers[i](event, eventList);
+			for (int i = 0; i < List_count(handlers); i++) {
+				EventHandler handler = List_get(handlers, i);
+				handler(event, eventList);
 			}
 			Event_free(&event);
 		}
 		sleepMillis(33);  // ~ 30 FPS
 	}
 	EventQueue_free(&eventList);
+	List_free(&handlers);
 	return 0;
 }
 
