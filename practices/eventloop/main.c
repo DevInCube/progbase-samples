@@ -36,19 +36,26 @@ RandomNumberEvent * RandomNumberEvent_new(int number) {
 	return self;
 }
 
-void RandomEventGen_update(Event * event, EventQueue * events);
-void InputManager_update(Event * event, EventQueue * events);
-void Event_handleEvent(Event * event, EventQueue * events);
+void RandomEventGen_update(void * self, Event * event, EventQueue * events);
+void InputManager_update(void * self, Event * event, EventQueue * events);
+void Event_handleEvent(void * self, Event * event, EventQueue * events);
 
 enum { UpdateEventTypeId = 0 };
+
+typedef struct HandlerObject HandlerObject;
+struct HandlerObject {
+	void * self;
+	EventHandler handler;
+};
 
 int main(void) {
 	srand(time(NULL));
 
 	List * handlers = List_new();
-	List_add(handlers, RandomEventGen_update);
-	List_add(handlers, InputManager_update);
-	List_add(handlers, Event_handleEvent);	
+	List_add(handlers, &(HandlerObject){NULL, RandomEventGen_update});
+	List_add(handlers, &(HandlerObject){NULL, InputManager_update});
+	int counter = 0;
+	List_add(handlers, &(HandlerObject){&counter, Event_handleEvent});	
 	
 	EventQueue * eventList = EventQueue_new();
 	while (1) {
@@ -57,8 +64,8 @@ int main(void) {
 		while (EventQueue_size(eventList) > 0) {
 			Event * event = EventQueue_dequeue(eventList);
 			for (int i = 0; i < List_count(handlers); i++) {
-				EventHandler handler = List_get(handlers, i);
-				handler(event, eventList);
+				HandlerObject * handler = List_get(handlers, i);
+				handler->handler(handler->self, event, eventList);
 			}
 			Event_free(&event);
 		}
@@ -69,7 +76,7 @@ int main(void) {
 	return 0;
 }
 
-void RandomEventGen_update(Event * event, EventQueue * events) {
+void RandomEventGen_update(void * self, Event * event, EventQueue * events) {
 	if (rand() % 33 == 0) {
 		int number = rand() % 200 - 100;
 		EventQueue_enqueue(
@@ -78,7 +85,7 @@ void RandomEventGen_update(Event * event, EventQueue * events) {
 	}
 }
 
-void InputManager_update(Event * event, EventQueue * events) {
+void InputManager_update(void * self, Event * event, EventQueue * events) {
 	if (conIsKeyDown()) {
 		char ch = getchar();
 		EventQueue_enqueue(
@@ -89,7 +96,7 @@ void InputManager_update(Event * event, EventQueue * events) {
 
 enum { CustomEventTypeId = 124090 };
 
-void Event_handleEvent(Event * event, EventQueue * eventList) {
+void Event_handleEvent(void * self, Event * event, EventQueue * eventList) {
 	switch (event->type) {
 		case UpdateEventTypeId: {
 			putchar('.');
@@ -112,7 +119,9 @@ void Event_handleEvent(Event * event, EventQueue * eventList) {
 			break;
 		}
 		case CustomEventTypeId: {
-			printf(">>> Custom event!\n");
+			int * counterPtr = (int *)self;
+			(*counterPtr)++;
+			printf(">>> Custom event! Counter: %i\n", *counterPtr);
 			break;
 		}
 	} 
