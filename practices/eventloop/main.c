@@ -40,7 +40,10 @@ void RandomEventGen_update(void * self, Event * event, EventQueue * events);
 void InputManager_update(void * self, Event * event, EventQueue * events);
 void Event_handleEvent(void * self, Event * event, EventQueue * events);
 
-enum { UpdateEventTypeId = 0 };
+enum { 
+	UpdateEventTypeId = 0,
+	StartEventTypeId = 1
+};
 
 typedef struct HandlerObject HandlerObject;
 struct HandlerObject {
@@ -49,8 +52,6 @@ struct HandlerObject {
 };
 
 int main(void) {
-	srand(time(NULL));
-
 	List * handlers = List_new();
 	List_add(handlers, &(HandlerObject){NULL, RandomEventGen_update});
 	List_add(handlers, &(HandlerObject){NULL, InputManager_update});
@@ -58,9 +59,13 @@ int main(void) {
 	List_add(handlers, &(HandlerObject){&counter, Event_handleEvent});	
 	
 	EventQueue * eventList = EventQueue_new();
+	int started = 0;
 	while (1) {
-		Event * updateEvent = Event_new(UpdateEventTypeId, NULL);
-		EventQueue_enqueue(eventList, updateEvent);
+		if (!started) {
+			started = 1;
+			EventQueue_enqueue(eventList, Event_new(StartEventTypeId, NULL));
+		}
+		EventQueue_enqueue(eventList, Event_new(UpdateEventTypeId, NULL));
 		while (EventQueue_size(eventList) > 0) {
 			Event * event = EventQueue_dequeue(eventList);
 			for (int i = 0; i < List_count(handlers); i++) {
@@ -77,6 +82,9 @@ int main(void) {
 }
 
 void RandomEventGen_update(void * self, Event * event, EventQueue * events) {
+	if (event->type == StartEventTypeId) {
+		srand(time(0));
+	}
 	if (rand() % 33 == 0) {
 		int number = rand() % 200 - 100;
 		EventQueue_enqueue(
@@ -98,6 +106,10 @@ enum { CustomEventTypeId = 124090 };
 
 void Event_handleEvent(void * self, Event * event, EventQueue * eventList) {
 	switch (event->type) {
+		case StartEventTypeId: {
+			puts("START!");
+			break;
+		}
 		case UpdateEventTypeId: {
 			putchar('.');
 			break;
