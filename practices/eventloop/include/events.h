@@ -29,4 +29,8 @@ typedef void (*EventHandler)(void * self, Event * event, EventQueue * events);
 		struct SUPERTYPE SUPERTYPE; \
 	}
 
+#define if_let(VARIN, TYPE, VAROUT) \
+	for (TYPE * VAROUT = (TYPE *)VARIN; \
+		VARIN->type == TYPE##TypeId;)
+
 #endif
