@@ -44,6 +44,7 @@ enum {
 typedef struct HandlerObject HandlerObject;
 struct HandlerObject {
 	void * self;
+	Destructor destructor;
 	EventHandler handler;
 };
 
@@ -61,12 +62,12 @@ int main(void) {
 		.events = EventQueue_new()
 	};
 
-	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, RandomEventGen_update});
-	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, InputManager_update});
+	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, NULL, RandomEventGen_update});
+	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, NULL, InputManager_update});
 	int counter = 0;
-	List_add(g_eventSystem->handlers, &(HandlerObject){&counter, CustomHandler_handleEvent});
+	List_add(g_eventSystem->handlers, &(HandlerObject){&counter, NULL, CustomHandler_handleEvent});
 	int timeCounter = 100;
-	List_add(g_eventSystem->handlers, &(HandlerObject){&timeCounter, Timer_handleEvent});
+	List_add(g_eventSystem->handlers, &(HandlerObject){&timeCounter, NULL, Timer_handleEvent});
 
 	EventQueue_enqueue(
 		g_eventSystem->events, 
@@ -91,6 +92,9 @@ int main(void) {
 					}
 				}
 				List_remove(g_eventSystem->handlers, handlerToRemove);
+				if (handlerToRemove->destructor != NULL) {
+					handlerToRemove->destructor(handlerToRemove->self);
+				}
 			}
 			Event_free(&event);
 		}
