@@ -25,14 +25,37 @@ void Event_free(Event ** selfPtr);
 
 typedef void (*EventHandler)(void * self, Event * event);
 
-#define extends(SUPERTYPE) \
-	struct { \
-		struct SUPERTYPE; \
-		struct SUPERTYPE SUPERTYPE; \
-	}
+typedef struct HandlerObject HandlerObject;
 
-#define if_let(VARIN, TYPE, VAROUT) \
-	for (TYPE * VAROUT = (TYPE *)VARIN; \
-		VARIN->type == TYPE##TypeId;)
+HandlerObject * HandlerObject_new(void * data, Destructor dest, EventHandler handler);
+void HandlerObject_free(HandlerObject ** selfPtr);
+void HandlerObject_handleEvent(HandlerObject * self, Event * event);
+
+typedef struct EventSystem EventSystem;
+
+typedef enum {
+	EventSystemActionContinue,
+	EventSystemActionExit
+} EventSystemAction;
+
+typedef struct HandlerObjectEnumerator HandlerObjectEnumerator;
+
+void EventSystem_init(void);
+void EventSystem_deinit(void);
+void EventSystem_addHandler(HandlerObject * handler);
+void EventSystem_removeHandler(void * handler);
+void EventSystem_raiseEvent(Event * event);
+bool EventSystem_handleEvent(Event * event);
+Event * EventSystem_getNextEvent(void);
+HandlerObjectEnumerator * EventSystem_getHandlers(void);
+HandlerObject * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self);
+void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr);
+
+enum { 
+	ExitEventTypeId = -1,
+	UpdateEventTypeId = 0,
+	StartEventTypeId = 1,
+	RemoveHandlerEventTypeId = 767456
+};
 
 #endif
