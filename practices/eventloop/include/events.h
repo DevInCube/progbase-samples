@@ -16,11 +16,11 @@ typedef void (*Destructor)(void * dataPtr);
 struct Event {
 	void * sender;
 	int type;
-	Destructor destructor;
 	void * data;
+	Destructor destructor;
 };
 
-Event * Event_new(void * sender, int type, Destructor dest, void * data);
+Event * Event_new(void * sender, int type, void * data, Destructor dest);
 void Event_free(Event ** selfPtr);
 
 typedef void (*EventHandler)(void * self, Event * event);

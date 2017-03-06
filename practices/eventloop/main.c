@@ -15,7 +15,7 @@ enum { KeyInputEventTypeId = 47578 };
 Event * KeyInputEvent_new(void * sender, char key) {
 	KeyInputEvent * data = malloc(sizeof(struct KeyInputEvent));
 	data->keyCode = key;
-	return Event_new(sender, KeyInputEventTypeId, NULL, data);
+	return Event_new(sender, KeyInputEventTypeId, data, NULL);
 }
 
 typedef struct RandomNumberEvent RandomNumberEvent;
@@ -27,16 +27,18 @@ enum { RandomNumberEventTypeId = 134134 };
 Event * RandomNumberEvent_new(void * sender, int number) {
 	RandomNumberEvent * data = malloc(sizeof(struct RandomNumberEvent));
 	data->number = number;
-	return Event_new(sender, RandomNumberEventTypeId, NULL, data);
+	return Event_new(sender, RandomNumberEventTypeId, data, free);
 }
 
 void RandomEventGen_update(void * self, Event * event);
 void InputManager_update(void * self, Event * event);
-void Event_handleEvent(void * self, Event * event);
+void CustomHandler_handleEvent(void * self, Event * event);
+void Timer_handleEvent(void * self, Event * event);
 
 enum { 
 	UpdateEventTypeId = 0,
-	StartEventTypeId = 1
+	StartEventTypeId = 1,
+	RemoveHandlerEventTypeId = 767456
 };
 
 typedef struct HandlerObject HandlerObject;
@@ -51,25 +53,25 @@ struct EventSystem {
 	EventQueue * events;
 };
 
-EventSystem * g_eventSystem = &(EventSystem) { NULL, NULL };
+EventSystem * g_eventSystem = NULL;
 
 int main(void) {
-	g_eventSystem->handlers = List_new();
-	g_eventSystem->events = EventQueue_new();
+	g_eventSystem = &(EventSystem) { 
+		.handlers = List_new(), 
+		.events = EventQueue_new()
+	};
 
 	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, RandomEventGen_update});
 	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, InputManager_update});
 	int counter = 0;
-	List_add(g_eventSystem->handlers, &(HandlerObject){&counter, Event_handleEvent});
+	List_add(g_eventSystem->handlers, &(HandlerObject){&counter, CustomHandler_handleEvent});
+	int timeCounter = 100;
+	List_add(g_eventSystem->handlers, &(HandlerObject){&timeCounter, Timer_handleEvent});
 
-	int started = 0;
+	EventQueue_enqueue(
+		g_eventSystem->events, 
+		Event_new(NULL, StartEventTypeId, NULL, NULL));
 	while (1) {
-		if (!started) {
-			started = 1;
-			EventQueue_enqueue(
-				g_eventSystem->events, 
-				Event_new(NULL, StartEventTypeId, NULL, NULL));
-		}
 		EventQueue_enqueue(
 			g_eventSystem->events, 
 			Event_new(NULL, UpdateEventTypeId, NULL, NULL));
@@ -78,6 +80,17 @@ int main(void) {
 			for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
 				HandlerObject * handler = List_get(g_eventSystem->handlers, i);
 				handler->handler(handler->self, event);
+			}
+			if (event->type == RemoveHandlerEventTypeId) {
+				HandlerObject * handlerToRemove = NULL;
+				for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
+					HandlerObject * handler = List_get(g_eventSystem->handlers, i);
+					if (handler->self == event->data) {
+						handlerToRemove = handler;
+						break;
+					}
+				}
+				List_remove(g_eventSystem->handlers, handlerToRemove);
 			}
 			Event_free(&event);
 		}
@@ -102,16 +115,16 @@ void RandomEventGen_update(void * self, Event * event) {
 
 void InputManager_update(void * self, Event * event) {
 	if (conIsKeyDown()) {
-		char ch = getchar();
+		char keyCode = getchar();
 		EventQueue_enqueue(
 			g_eventSystem->events, 
-			KeyInputEvent_new(self, ch));
+			KeyInputEvent_new(self, keyCode));
 	}
 }
 
 enum { CustomEventTypeId = 124090 };
 
-void Event_handleEvent(void * self, Event * event) {
+void CustomHandler_handleEvent(void * self, Event * event) {
 	switch (event->type) {
 		case StartEventTypeId: {
 			puts("START!");
@@ -144,4 +157,23 @@ void Event_handleEvent(void * self, Event * event) {
 			break;
 		}
 	} 
+}
+
+void Timer_handleEvent(void * self, Event * event) {
+	switch(event->type) {
+		case UpdateEventTypeId: {
+			int * timePtr = (int *)self;
+			*timePtr -= 1;
+			if (*timePtr % 10 == 0) {
+				printf("\nTimer: %i\n", *timePtr); 
+			}
+			if (*timePtr == 0) {
+				printf("\nTimer COMPLETED!\n"); 
+				EventQueue_enqueue(
+					g_eventSystem->events, 
+					Event_new(self, RemoveHandlerEventTypeId, self, NULL));
+			}
+			break;
+		}
+	}
 }
