@@ -48,6 +48,23 @@ struct HandlerObject {
 	EventHandler handler;
 };
 
+HandlerObject * HandlerObject_new(void * data, Destructor dest, EventHandler handler) {
+	HandlerObject * self = malloc(sizeof(HandlerObject));
+	self->self = data;
+	self->destructor = dest;
+	self->handler = handler; 
+	return self;
+}
+
+void HandlerObject_free(HandlerObject ** selfPtr) {
+	HandlerObject * self = *selfPtr;
+	if (self->destructor != NULL && self->self != NULL) {
+		self->destructor(self->self);
+	}
+	free(self);
+	*selfPtr = NULL;
+}
+
 typedef struct EventSystem EventSystem;
 struct EventSystem {
 	List * handlers;
@@ -56,18 +73,24 @@ struct EventSystem {
 
 EventSystem * g_eventSystem = NULL;
 
+void EventSystem_addHandler(HandlerObject * handler);
+void EventSystem_removeHandler(void * handler);
+void EventSystem_raiseEvent(Event * event);
+
+static void __removeHandlerWithData(void * data);
+
 int main(void) {
 	g_eventSystem = &(EventSystem) { 
 		.handlers = List_new(), 
 		.events = EventQueue_new()
 	};
 
-	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, NULL, RandomEventGen_update});
-	List_add(g_eventSystem->handlers, &(HandlerObject){NULL, NULL, InputManager_update});
+	List_add(g_eventSystem->handlers, HandlerObject_new(NULL, NULL, RandomEventGen_update));
+	List_add(g_eventSystem->handlers, HandlerObject_new(NULL, NULL, InputManager_update));
 	int counter = 0;
-	List_add(g_eventSystem->handlers, &(HandlerObject){&counter, NULL, CustomHandler_handleEvent});
+	List_add(g_eventSystem->handlers, HandlerObject_new(&counter, NULL, CustomHandler_handleEvent));
 	int timeCounter = 100;
-	List_add(g_eventSystem->handlers, &(HandlerObject){&timeCounter, NULL, Timer_handleEvent});
+	List_add(g_eventSystem->handlers, HandlerObject_new(&timeCounter, NULL, Timer_handleEvent));
 
 	EventQueue_enqueue(
 		g_eventSystem->events, 
@@ -83,26 +106,46 @@ int main(void) {
 				handler->handler(handler->self, event);
 			}
 			if (event->type == RemoveHandlerEventTypeId) {
-				HandlerObject * handlerToRemove = NULL;
-				for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
-					HandlerObject * handler = List_get(g_eventSystem->handlers, i);
-					if (handler->self == event->data) {
-						handlerToRemove = handler;
-						break;
-					}
-				}
-				List_remove(g_eventSystem->handlers, handlerToRemove);
-				if (handlerToRemove->destructor != NULL) {
-					handlerToRemove->destructor(handlerToRemove->self);
-				}
+				__removeHandlerWithData(event->data);
 			}
 			Event_free(&event);
 		}
 		sleepMillis(33);  // ~ 30 FPS
 	}
 	EventQueue_free(&g_eventSystem->events);
+	for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
+		HandlerObject * handler = List_get(g_eventSystem->handlers, i);
+		HandlerObject_free(&handler);
+	}
 	List_free(&g_eventSystem->handlers);
 	return 0;
+}
+
+void EventSystem_addHandler(HandlerObject * handler) {
+	List_add(g_eventSystem->handlers, handler);
+}
+
+void EventSystem_removeHandler(void * handler) {
+	EventSystem_raiseEvent(Event_new(NULL, RemoveHandlerEventTypeId, handler, NULL));
+}
+
+void EventSystem_raiseEvent(Event * event) {
+	EventQueue_enqueue(g_eventSystem->events, event);
+}
+
+static void __removeHandlerWithData(void * data) {
+	HandlerObject * handlerToRemove = NULL;	
+	for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
+		HandlerObject * handler = List_get(g_eventSystem->handlers, i);
+		if (handler->self == data) {
+			handlerToRemove = handler;
+			break;
+		}
+	}
+	if (handlerToRemove != NULL) {
+		List_remove(g_eventSystem->handlers, handlerToRemove);
+		HandlerObject_free(&handlerToRemove);
+	}
 }
 
 void RandomEventGen_update(void * self, Event * event) {
@@ -149,6 +192,15 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 				EventQueue_enqueue(
 					g_eventSystem->events, 
 					Event_new(self, CustomEventTypeId, NULL, NULL));
+			}
+			if (keyEvent->keyCode == 'a') {
+				int * timer = malloc(sizeof(int));
+				*timer = 50;
+				HandlerObject * handler = malloc(sizeof(HandlerObject));
+				handler->self = timer;
+				handler->handler = Timer_handleEvent;
+				handler->destructor = free;
+				EventSystem_addHandler(handler);
 			}
 			printf("Key pressed `%c` [%i]\n", 
 				keyEvent->keyCode, keyEvent->keyCode);
