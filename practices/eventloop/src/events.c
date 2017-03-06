@@ -27,15 +27,16 @@ void EventQueue_free(EventQueue ** selfPtr) {
 void EventQueue_enqueue(EventQueue *  self, Event * event) {
 	List_add(self->list, event);
 }
+
 Event * EventQueue_dequeue(EventQueue *  self) {
 	Event * event = List_get(self->list, 0);
 	List_removeAt(self->list, 0);
 	return event;
 }
+
 int EventQueue_size(EventQueue * self) {
 	return List_count(self->list);
 }
-
 
 Event * Event_new(void * sender, int type, Destructor dest, void * data) {
 	Event * self = malloc(sizeof(struct Event));
@@ -48,10 +49,11 @@ Event * Event_new(void * sender, int type, Destructor dest, void * data) {
 
 void Event_free(Event ** selfPtr) {
 	Event * self = *selfPtr;
-	if (self->destructor != NULL) {
+	if (self->destructor == NULL) {
+		self->destructor = free;
+	}
+	if (self->data != NULL) {
 		self->destructor(self->data);
-	} else {
-		free(self->data);
 	}
 	free(self);
 	*selfPtr = NULL;

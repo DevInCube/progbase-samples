@@ -66,9 +66,13 @@ int main(void) {
 	while (1) {
 		if (!started) {
 			started = 1;
-			EventQueue_enqueue(g_eventSystem->events, Event_new(NULL, StartEventTypeId, NULL, NULL));
+			EventQueue_enqueue(
+				g_eventSystem->events, 
+				Event_new(NULL, StartEventTypeId, NULL, NULL));
 		}
-		EventQueue_enqueue(g_eventSystem->events, Event_new(NULL, UpdateEventTypeId, NULL, NULL));
+		EventQueue_enqueue(
+			g_eventSystem->events, 
+			Event_new(NULL, UpdateEventTypeId, NULL, NULL));
 		while (EventQueue_size(g_eventSystem->events) > 0) {
 			Event * event = EventQueue_dequeue(g_eventSystem->events);
 			for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
