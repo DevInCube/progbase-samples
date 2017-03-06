@@ -8,32 +8,26 @@
 
 typedef struct KeyInputEvent KeyInputEvent;
 struct KeyInputEvent {
-	struct { Event; };
 	char keyCode; 
 };
 enum { KeyInputEventTypeId = 47578 };
 
-KeyInputEvent * KeyInputEvent_new(char key) {
-	KeyInputEvent * self = malloc(sizeof(struct KeyInputEvent));
-	self->destructor = NULL;
-	self->type = KeyInputEventTypeId;
-	self->keyCode = key;
-	return self;
+Event * KeyInputEvent_new(void * sender, char key) {
+	KeyInputEvent * data = malloc(sizeof(struct KeyInputEvent));
+	data->keyCode = key;
+	return Event_new(sender, KeyInputEventTypeId, NULL, data);
 }
 
 typedef struct RandomNumberEvent RandomNumberEvent;
 struct RandomNumberEvent {
-	struct { Event; };
 	int number;
 };
 enum { RandomNumberEventTypeId = 134134 };
 
-RandomNumberEvent * RandomNumberEvent_new(int number) {
-	RandomNumberEvent * self = malloc(sizeof(struct RandomNumberEvent));
-	self->destructor = NULL;
-	self->type = RandomNumberEventTypeId;
-	self->number = number;
-	return self;
+Event * RandomNumberEvent_new(void * sender, int number) {
+	RandomNumberEvent * data = malloc(sizeof(struct RandomNumberEvent));
+	data->number = number;
+	return Event_new(sender, RandomNumberEventTypeId, NULL, data);
 }
 
 void RandomEventGen_update(void * self, Event * event, EventQueue * events);
@@ -63,9 +57,9 @@ int main(void) {
 	while (1) {
 		if (!started) {
 			started = 1;
-			EventQueue_enqueue(eventList, Event_new(StartEventTypeId, NULL));
+			EventQueue_enqueue(eventList, Event_new(NULL, StartEventTypeId, NULL, NULL));
 		}
-		EventQueue_enqueue(eventList, Event_new(UpdateEventTypeId, NULL));
+		EventQueue_enqueue(eventList, Event_new(NULL, UpdateEventTypeId, NULL, NULL));
 		while (EventQueue_size(eventList) > 0) {
 			Event * event = EventQueue_dequeue(eventList);
 			for (int i = 0; i < List_count(handlers); i++) {
@@ -89,7 +83,7 @@ void RandomEventGen_update(void * self, Event * event, EventQueue * events) {
 		int number = rand() % 200 - 100;
 		EventQueue_enqueue(
 			events, 
-			(Event *)RandomNumberEvent_new(number));
+			RandomNumberEvent_new(self, number));
 	}
 }
 
@@ -98,7 +92,7 @@ void InputManager_update(void * self, Event * event, EventQueue * events) {
 		char ch = getchar();
 		EventQueue_enqueue(
 			events, 
-			(Event *)KeyInputEvent_new(ch));
+			(Event *)KeyInputEvent_new(self, ch));
 	}
 }
 
@@ -115,16 +109,16 @@ void Event_handleEvent(void * self, Event * event, EventQueue * eventList) {
 			break;
 		}
 		case RandomNumberEventTypeId: {
-			RandomNumberEvent * randEvent = (RandomNumberEvent *)event;
+			RandomNumberEvent * randEvent = (RandomNumberEvent *)event->data;
 			printf("Random number %i\n", randEvent->number);
 			break;
 		}
 		case KeyInputEventTypeId: {
-			KeyInputEvent * keyEvent = (KeyInputEvent *)event;
+			KeyInputEvent * keyEvent = (KeyInputEvent *)event->data;
 			if (keyEvent->keyCode == ' ') {
 				EventQueue_enqueue(
 					eventList, 
-					Event_new(CustomEventTypeId, NULL));
+					Event_new(self, CustomEventTypeId, NULL, NULL));
 			}
 			printf("Key pressed `%c` [%i]\n", 
 				keyEvent->keyCode, keyEvent->keyCode);

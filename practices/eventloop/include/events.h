@@ -11,14 +11,16 @@ void EventQueue_enqueue(EventQueue *  self, Event * event);
 Event * EventQueue_dequeue(EventQueue *  self);
 int EventQueue_size(EventQueue * self);
 
-typedef void (*Destructor)(Event ** event);
+typedef void (*Destructor)(void * dataPtr);
 
 struct Event {
-	Destructor destructor;
+	void * sender;
 	int type;
+	Destructor destructor;
+	void * data;
 };
 
-Event * Event_new(int eventType, Destructor dest);
+Event * Event_new(void * sender, int type, Destructor dest, void * data);
 void Event_free(Event ** selfPtr);
 
 typedef void (*EventHandler)(void * self, Event * event, EventQueue * events);
