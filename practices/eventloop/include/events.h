@@ -23,7 +23,7 @@ struct Event {
 Event * Event_new(void * sender, int type, Destructor dest, void * data);
 void Event_free(Event ** selfPtr);
 
-typedef void (*EventHandler)(void * self, Event * event, EventQueue * events);
+typedef void (*EventHandler)(void * self, Event * event);
 
 #define extends(SUPERTYPE) \
 	struct { \
