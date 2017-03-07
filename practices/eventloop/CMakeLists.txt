@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.9)
-project (mycsv)
+project (eventsystem)
 
 # add_executable(proj main.c)
 

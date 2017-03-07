@@ -5,7 +5,7 @@
 			"name": "C++ Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"program": "${workspaceRoot}/build/mycsv",
+			"program": "${workspaceRoot}/build/eventsystem",
 			"args": [],
 			"stopAtEntry": false,
 			"cwd": "${workspaceRoot}",
