@@ -1,3 +1,4 @@
+#define _XOPEN_SOURCE 700  // to enable struct timespec and clock_gettime
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -6,6 +7,18 @@
 #include <progbase.h>
 #include <events.h>
 #include <fs.h>
+#include <time.h>
+
+typedef struct _Clock Clock;
+
+struct _Clock {
+    struct timespec time;
+};
+
+Clock Clock_now(void);
+double Clock_diffMillis(Clock c1, Clock c2);
+
+/* Event Queue */
 
 struct EventQueue {
 	List * list;
@@ -180,10 +193,18 @@ void EventSystem_deinit(void) {
 }
 
 void EventSystem_loop(void) {
+	const int FPS = 30;
+    const double millisPerFrame = 1000 / FPS;
+
 	EventSystem_raiseEvent(Event_new(NULL, StartEventTypeId, NULL, NULL));
+	double elapsedMillis = 0;
+	Clock lastTicks = Clock_now();
 	bool isRunning = true;
 	while (isRunning) {
-		EventSystem_raiseEvent(Event_new(NULL, UpdateEventTypeId, NULL, NULL));
+		Clock current = Clock_now();
+        elapsedMillis = Clock_diffMillis(current, lastTicks);
+
+		EventSystem_raiseEvent(Event_new(NULL, UpdateEventTypeId, &elapsedMillis, NULL));
 		
 		Event * event = NULL;
 		while((event = EventSystem_getNextEvent()) != NULL) {
@@ -198,6 +219,25 @@ void EventSystem_loop(void) {
 			}
 			Event_free(&event);
 		}
-		sleepMillis(33);  // ~ 30 FPS
+
+		double millis = Clock_diffMillis(Clock_now(), current);
+        if (millis < millisPerFrame) sleepMillis(millisPerFrame - millis);
+        lastTicks = current;
 	}
+}
+
+Clock Clock_now(void) {
+    Clock clock;
+    clock_gettime(CLOCK_REALTIME, &(clock.time));
+    return clock;
+}
+
+static double _getMillis(struct timespec * t1, struct timespec * t2) {
+    double ms1 = (double)t1->tv_sec * 1000 + (double)t1->tv_nsec / 1000000.0;
+    double ms2 = (double)t2->tv_sec * 1000 + (double)t2->tv_nsec / 1000000.0;
+    return ms1 - ms2;
+}
+
+double Clock_diffMillis(Clock c1, Clock c2) {
+    return _getMillis(&c1.time, &c2.time);
 }

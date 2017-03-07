@@ -43,16 +43,18 @@ struct Timer {
 int main(void) {
 	EventSystem_init();
 
+	// add event handlers
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
-	int spaceHitCounter = 0;
-	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, CustomHandler_handleEvent));
 	Timer timer = {
 		.id = 0,
 		.timeCounter = 100
 	};
 	EventSystem_addHandler(HandlerObject_new(&timer, NULL, Timer_handleEvent));
+	int spaceHitCounter = 0;
+	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, CustomHandler_handleEvent));
 
+	// start infinite event loop
 	EventSystem_loop();
 	EventSystem_deinit();
 	return 0;
@@ -124,9 +126,10 @@ void Timer_handleEvent(void * self, Event * event) {
 	switch(event->type) {
 		case UpdateEventTypeId: {
 			Timer * timer = (Timer *)self;
+			double elapsedMillis = *(double *)event->data;
 			timer->timeCounter -= 1;
 			if (timer->timeCounter % 10 == 0) {
-				printf("\nTimer [%i]: %i\n", timer->id, timer->timeCounter); 
+				printf("\nTimer [%i]: %i {%lf}\n", timer->id, timer->timeCounter, elapsedMillis); 
 			}
 			if (timer->timeCounter == 0) {
 				printf("\nTimer [%i] COMPLETED!\n", timer->id); 
