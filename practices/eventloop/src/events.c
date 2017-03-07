@@ -9,6 +9,10 @@
 #include <fs.h>
 #include <time.h>
 
+/**
+    @struct Clock
+    @brief encapsulates clock data
+*/
 typedef struct Clock Clock;
 
 struct Clock {
@@ -96,7 +100,7 @@ void Event_free(Event ** selfPtr) {
 	@brief a structure that holds information about events and handlers
 */
 struct EventSystem {
-	List * handlers;  /**< a list of system actors */
+	List * handlers;  /**< a list of system event handlers */
 	EventQueue * events;  /**< a a queue of unhandled events */
 };
 
@@ -108,16 +112,16 @@ typedef enum {
 } EventSystemAction;
 
 /**
-	@typedef HandlerObjectEnumerator
+	@class EventHandlerEnumerator
 	@brief an Enumerator (Iterator) to access all handlers in EventSystem
 */
-typedef struct HandlerObjectEnumerator HandlerObjectEnumerator;
+typedef struct EventHandlerEnumerator EventHandlerEnumerator;
 
 bool EventSystem_handleEvent(Event * event);
 Event * EventSystem_getNextEvent(void);
-HandlerObjectEnumerator * EventSystem_getHandlers(void);
-EventHandler * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self);
-void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr);
+EventHandlerEnumerator * EventSystem_getHandlers(void);
+EventHandler * EventHandlerEnumerator_getNextHandler(EventHandlerEnumerator * self);
+void EventHandlerEnumerator_free(EventHandlerEnumerator ** selfPtr);
 
 typedef struct EventSystem EventSystem;
 
@@ -150,25 +154,25 @@ void EventHandler_handleEvent(EventHandler * self, Event * event) {
 
 static void __removeHandler(EventHandler * handler);
 
-struct HandlerObjectEnumerator {
+struct EventHandlerEnumerator {
 	List * handlers;
 	int index;
 };
 
-HandlerObjectEnumerator * HandlerObjectEnumerator_new(List * handlers) {
-	HandlerObjectEnumerator * self = malloc(sizeof(HandlerObjectEnumerator));
+EventHandlerEnumerator * EventHandlerEnumerator_new(List * handlers) {
+	EventHandlerEnumerator * self = malloc(sizeof(EventHandlerEnumerator));
 	self->handlers = handlers;
 	self->index = 0;
 	return self;
 }
 
-void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr) {
-	HandlerObjectEnumerator * self = *selfPtr;
+void EventHandlerEnumerator_free(EventHandlerEnumerator ** selfPtr) {
+	EventHandlerEnumerator * self = *selfPtr;
 	free(self);
 	*selfPtr = NULL;
 }
 
-EventHandler * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self) {
+EventHandler * EventHandlerEnumerator_getNextHandler(EventHandlerEnumerator * self) {
 	if (self->index >= List_count(self->handlers)) return NULL;
 	return List_get(self->handlers, self->index++);
 }
@@ -178,8 +182,8 @@ Event * EventSystem_getNextEvent(void) {
 	return EventQueue_dequeue(g_eventSystem->events);
 }
 
-HandlerObjectEnumerator * EventSystem_getHandlers(void) {
-	return HandlerObjectEnumerator_new(g_eventSystem->handlers);
+EventHandlerEnumerator * EventSystem_getHandlers(void) {
+	return EventHandlerEnumerator_new(g_eventSystem->handlers);
 }
 
 bool EventSystem_handleEvent(Event * event) {
@@ -245,12 +249,12 @@ void EventSystem_loop(void) {
 		
 		Event * event = NULL;
 		while((event = EventSystem_getNextEvent()) != NULL) {
-			HandlerObjectEnumerator * handlersEnum = EventSystem_getHandlers();
+			EventHandlerEnumerator * handlersEnum = EventSystem_getHandlers();
 			EventHandler * handler = NULL;
-			while((handler = HandlerObjectEnumerator_getNextHandler(handlersEnum)) != NULL) {
+			while((handler = EventHandlerEnumerator_getNextHandler(handlersEnum)) != NULL) {
 				EventHandler_handleEvent(handler, event);
 			}
-			HandlerObjectEnumerator_free(&handlersEnum);
+			EventHandlerEnumerator_free(&handlersEnum);
 			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
 				isRunning = false;
 			}

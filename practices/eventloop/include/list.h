@@ -11,7 +11,7 @@
 // #include <collections/enumerable.h>
 
 /**
-    @typedef List
+    @struct List
     @brief defines a generic List data type
 */
 typedef struct List List;

@@ -9,6 +9,10 @@
 
 /* array.h */
 
+/**
+    @struct Array
+    @brief array of generic items
+*/
 typedef struct Array Array;
 
 /**
