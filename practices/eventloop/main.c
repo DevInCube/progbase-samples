@@ -5,29 +5,11 @@
 #include <events.h>
 #include <pbconsole.h>
 
-typedef struct KeyInputEvent KeyInputEvent;
-struct KeyInputEvent {
-	char keyCode; 
+enum { 
+	KeyInputEventTypeId = 47578,
+	RandomNumberEventTypeId = 134134,
+	CustomEventTypeId = 124090
 };
-enum { KeyInputEventTypeId = 47578 };
-
-Event * KeyInputEvent_new(void * sender, char key) {
-	KeyInputEvent * data = malloc(sizeof(struct KeyInputEvent));
-	data->keyCode = key;
-	return Event_new(sender, KeyInputEventTypeId, data, free);
-}
-
-typedef struct RandomNumberEvent RandomNumberEvent;
-struct RandomNumberEvent {
-	int number;
-};
-enum { RandomNumberEventTypeId = 134134 };
-
-Event * RandomNumberEvent_new(void * sender, int number) {
-	RandomNumberEvent * data = malloc(sizeof(struct RandomNumberEvent));
-	data->number = number;
-	return Event_new(sender, RandomNumberEventTypeId, data, free);
-}
 
 void RandomEventGen_update(void * self, Event * event);
 void InputManager_update(void * self, Event * event);
@@ -68,19 +50,19 @@ void RandomEventGen_update(void * self, Event * event) {
 		srand(time(0));
 	}
 	if (rand() % 33 == 0) {
-		int number = rand() % 200 - 100;
-		EventSystem_raiseEvent(RandomNumberEvent_new(self, number));
+		int * number = malloc(sizeof(int));
+		*number = rand() % 200 - 100;
+		EventSystem_raiseEvent(Event_new(self, RandomNumberEventTypeId, number, free));
 	}
 }
 
 void InputManager_update(void * self, Event * event) {
 	if (conIsKeyDown()) {
-		char keyCode = getchar();
-		EventSystem_raiseEvent(KeyInputEvent_new(self, keyCode));
+		char * keyCode = malloc(sizeof(char));
+		*keyCode = getchar();
+		EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));
 	}
 }
-
-enum { CustomEventTypeId = 124090 };
 
 void HitCounter_handleEvent(void * self, Event * event) {
 	switch (event->type) {
@@ -104,26 +86,26 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 			break;
 		}
 		case RandomNumberEventTypeId: {
-			RandomNumberEvent * randEvent = (RandomNumberEvent *)event->data;
-			printf("Random number %i\n", randEvent->number);
+			int * number = (int *)event->data;
+			printf("Random number %i\n", *number);
 			break;
 		}
 		case KeyInputEventTypeId: {
-			KeyInputEvent * keyEvent = (KeyInputEvent *)event->data;
-			if (keyEvent->keyCode == ' ') {
+			char * keyCodePtr = (char *)event->data;
+			char keyCode = *keyCodePtr;
+			if (keyCode == ' ') {
 				EventSystem_raiseEvent(Event_new(self, CustomEventTypeId, NULL, NULL));
 			}
-			if (keyEvent->keyCode == 'a') {
+			if (keyCode == 'a') {
 				Timer * timer = malloc(sizeof(Timer));
 				timer->id = rand() % 100;
 				timer->timeCounter = 50;
 				EventSystem_addHandler(HandlerObject_new(timer, free, Timer_handleEvent));
 			}
-			if (keyEvent->keyCode == 'q') {
+			if (keyCode == 'q') {
 				EventSystem_raiseEvent(Event_new(self, ExitEventTypeId, NULL, NULL));
 			}
-			printf("Key pressed `%c` [%i]\n", 
-				keyEvent->keyCode, keyEvent->keyCode);
+			printf("Key pressed `%c` [%i]\n", keyCode, keyCode);
 			break;
 		}
 	} 
