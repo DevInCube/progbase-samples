@@ -31,13 +31,13 @@ int main(void) {
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, TestUpdate_update));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
-	int spaceHitCounter = 0;
-	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, HitCounter_handleEvent));
-	Timer timer = {
-		.id = 0,
-		.timeCounter = 100
-	};
-	EventSystem_addHandler(HandlerObject_new(&timer, NULL, Timer_handleEvent));
+	int * spaceHitCounter = malloc(sizeof(int));
+	*spaceHitCounter = 0;
+	EventSystem_addHandler(HandlerObject_new(spaceHitCounter, free, HitCounter_handleEvent));
+	Timer * timer = malloc(sizeof(Timer));
+	timer->id = 0;
+	timer->timeCounter = 100;
+	EventSystem_addHandler(HandlerObject_new(timer, free, Timer_handleEvent));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, CustomHandler_handleEvent));
 
 	// start infinite event loop
