@@ -20,6 +20,18 @@ double Clock_diffMillis(Clock c1, Clock c2);
 
 /* Event Queue */
 
+typedef struct EventQueue EventQueue;
+
+EventQueue * EventQueue_new(void);
+void EventQueue_free(EventQueue ** selfPtr);
+void EventQueue_enqueue(EventQueue *  self, Event * event);
+Event * EventQueue_dequeue(EventQueue *  self);
+int EventQueue_size(EventQueue * self);
+
+/**
+	@struct EventQueue
+	@brief a queue of items of type Event
+*/
 struct EventQueue {
 	List * list;
 };
@@ -37,16 +49,27 @@ void EventQueue_free(EventQueue ** selfPtr) {
 	*selfPtr = NULL;
 }
 
+/**
+	@brief adds new Event to the EventQueue tail
+	@param event - new event
+*/
 void EventQueue_enqueue(EventQueue *  self, Event * event) {
 	List_add(self->list, event);
 }
 
+/**
+	@brief removes a n Event from the EventQueue head
+	@returns Event from head or NULL otherwise
+*/
 Event * EventQueue_dequeue(EventQueue *  self) {
 	Event * event = List_get(self->list, 0);
 	List_removeAt(self->list, 0);
 	return event;
 }
 
+/**
+	@returns the number of events in EventQueue
+*/
 int EventQueue_size(EventQueue * self) {
 	return List_count(self->list);
 }
@@ -69,18 +92,48 @@ void Event_free(Event ** selfPtr) {
 	*selfPtr = NULL;
 }
 
+/**
+	@brief a structure that holds information about events and handlers
+*/
 struct EventSystem {
-	List * handlers;
-	EventQueue * events;
+	List * handlers;  /**< a list of system actors */
+	EventQueue * events;  /**< a a queue of unhandled events */
 };
+
+/* EventSystem */
+
+typedef enum {
+	EventSystemActionContinue,
+	EventSystemActionExit
+} EventSystemAction;
+
+/**
+	@typedef HandlerObjectEnumerator
+	@brief an Enumerator (Iterator) to access all handlers in EventSystem
+*/
+typedef struct HandlerObjectEnumerator HandlerObjectEnumerator;
+
+bool EventSystem_handleEvent(Event * event);
+Event * EventSystem_getNextEvent(void);
+HandlerObjectEnumerator * EventSystem_getHandlers(void);
+HandlerObject * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self);
+void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr);
+
+typedef struct EventSystem EventSystem;
 
 static EventSystem * g_eventSystem = &(EventSystem) { NULL, NULL };
 
+/**
+	@brief a structure that holds infomation about system actors
+*/
 struct HandlerObject {
-	void * self;
-	Destructor destructor;
-	EventHandler handler;
+	void * self;  /**< a pointer to an actor data */
+	Destructor destructor;  /**< a pointer to function that will be called to free self data*/
+	EventHandler handler;  /**< a pointer to function that will call on self events handle */
 };
+
+void HandlerObject_handleEvent(HandlerObject * self, Event * event);
+void HandlerObject_free(HandlerObject ** selfPtr);
 
 HandlerObject * HandlerObject_new(void * data, Destructor dest, EventHandler handler) {
 	HandlerObject * self = malloc(sizeof(HandlerObject));

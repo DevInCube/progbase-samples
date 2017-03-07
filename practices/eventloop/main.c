@@ -11,9 +11,9 @@ enum {
 	CustomEventTypeId = 124090
 };
 
-void RandomEventGen_update(void * self, Event * event);
-void TestUpdate_update(void * self, Event * event);
-void InputManager_update(void * self, Event * event);
+void RandomNumberGenerator_update(void * self, Event * event);
+void UpdatePrintHandler_update(void * self, Event * event);
+void KeyInputHandler_update(void * self, Event * event);
 void CustomHandler_handleEvent(void * self, Event * event);
 void Timer_handleEvent(void * self, Event * event);
 void HitCounter_handleEvent(void * self, Event * event);
@@ -28,16 +28,16 @@ int main(void) {
 	EventSystem_init();
 
 	// add event handlers
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, TestUpdate_update));
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, UpdatePrintHandler_update));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, KeyInputHandler_update));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomNumberGenerator_update));
 	int * spaceHitCounter = malloc(sizeof(int));
 	*spaceHitCounter = 0;
 	EventSystem_addHandler(HandlerObject_new(spaceHitCounter, free, HitCounter_handleEvent));
 	Timer * timer = malloc(sizeof(Timer));
 	timer->id = 0;
 	timer->timeCounter = 100;
-	EventSystem_addHandler(HandlerObject_new(timer, free, Timer_handleEvent));
+	EventSystem_addHandler(HandlerObject_new(timer, NULL, Timer_handleEvent));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, CustomHandler_handleEvent));
 
 	// start infinite event loop
@@ -46,7 +46,7 @@ int main(void) {
 	return 0;
 }
 
-void TestUpdate_update(void * self, Event * event) {
+void UpdatePrintHandler_update(void * self, Event * event) {
 	switch (event->type) {
 		case StartEventTypeId: {
 			puts("<<<START!>>>");
@@ -59,22 +59,28 @@ void TestUpdate_update(void * self, Event * event) {
 	}
 }
 
-void InputManager_update(void * self, Event * event) {
-	if (conIsKeyDown()) {
+void KeyInputHandler_update(void * self, Event * event) {
+	if (conIsKeyDown()) {  // non-blocking key input check
 		char * keyCode = malloc(sizeof(char));
 		*keyCode = getchar();
 		EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));
 	}
 }
 
-void RandomEventGen_update(void * self, Event * event) {
-	if (event->type == StartEventTypeId) {
-		srand(time(0));
-	}
-	if (rand() % 33 == 0) {
-		int * number = malloc(sizeof(int));
-		*number = rand() % 200 - 100;
-		EventSystem_raiseEvent(Event_new(self, RandomNumberEventTypeId, number, free));
+void RandomNumberGenerator_update(void * self, Event * event) {
+	switch (event->type) {
+		case StartEventTypeId: {
+			srand(time(0));
+			break;
+		}
+		case UpdateEventTypeId: {
+			if (rand() % 33 == 0) {
+				int * number = malloc(sizeof(int));
+				*number = rand() % 200 - 100;
+				EventSystem_raiseEvent(Event_new(self, RandomNumberEventTypeId, number, free));
+			}
+			break;
+		}
 	}
 }
 
@@ -124,10 +130,10 @@ void Timer_handleEvent(void * self, Event * event) {
 			double elapsedMillis = *(double *)event->data;
 			timer->timeCounter -= 1;
 			if (timer->timeCounter % 10 == 0) {
-				printf("\nTimer [%i]: %i {%.1lf}\n", timer->id, timer->timeCounter, elapsedMillis); 
+				printf("\nTimer #%i: %i {%.1lf}\n", timer->id, timer->timeCounter, elapsedMillis); 
 			}
 			if (timer->timeCounter == 0) {
-				printf("\nTimer [%i] COMPLETED!\n", timer->id); 
+				printf("\nTimer #%i: COMPLETED!\n", timer->id); 
 				EventSystem_raiseEvent(Event_new(self, RemoveHandlerEventTypeId, self, NULL));
 			}
 			break;
