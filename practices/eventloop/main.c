@@ -5,12 +5,14 @@
 #include <events.h>
 #include <pbconsole.h>
 
+/* custom constant event type ids*/
 enum {
 	KeyInputEventTypeId = 47578,
 	RandomNumberEventTypeId = 134134,
 	CustomEventTypeId = 124090
 };
 
+/* event handler functions prototypes */
 void RandomNumberGenerator_update(EventHandler * self, Event * event);
 void UpdatePrintHandler_update(EventHandler * self, Event * event);
 void KeyInputHandler_update(EventHandler * self, Event * event);
@@ -25,6 +27,7 @@ struct Timer {
 };
 
 int main(void) {
+	// startup event system
 	EventSystem_init();
 
 	// add event handlers
@@ -42,9 +45,12 @@ int main(void) {
 
 	// start infinite event loop
 	EventSystem_loop();
+	// cleanup event system
 	EventSystem_deinit();
 	return 0;
 }
+
+/* event handlers functions implementations */
 
 void UpdatePrintHandler_update(EventHandler * self, Event * event) {
 	switch (event->type) {
