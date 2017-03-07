@@ -33,6 +33,7 @@ void RandomEventGen_update(void * self, Event * event);
 void InputManager_update(void * self, Event * event);
 void CustomHandler_handleEvent(void * self, Event * event);
 void Timer_handleEvent(void * self, Event * event);
+void HitCounter_handleEvent(void * self, Event * event);
 
 typedef struct Timer Timer;
 struct Timer {
@@ -46,13 +47,14 @@ int main(void) {
 	// add event handlers
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
+	int spaceHitCounter = 0;
+	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, HitCounter_handleEvent));
 	Timer timer = {
 		.id = 0,
 		.timeCounter = 100
 	};
 	EventSystem_addHandler(HandlerObject_new(&timer, NULL, Timer_handleEvent));
-	int spaceHitCounter = 0;
-	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, CustomHandler_handleEvent));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, CustomHandler_handleEvent));
 
 	// start infinite event loop
 	EventSystem_loop();
@@ -79,6 +81,17 @@ void InputManager_update(void * self, Event * event) {
 }
 
 enum { CustomEventTypeId = 124090 };
+
+void HitCounter_handleEvent(void * self, Event * event) {
+	switch (event->type) {
+		case CustomEventTypeId: {
+			int * counterPtr = (int *)self;
+			(*counterPtr)++;
+			printf(">>> Custom event! Counter: %i\n", *counterPtr);
+			break;
+		}
+	}
+}
 
 void CustomHandler_handleEvent(void * self, Event * event) {
 	switch (event->type) {
@@ -113,12 +126,6 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 				keyEvent->keyCode, keyEvent->keyCode);
 			break;
 		}
-		case CustomEventTypeId: {
-			int * counterPtr = (int *)self;
-			(*counterPtr)++;
-			printf(">>> Custom event! Counter: %i\n", *counterPtr);
-			break;
-		}
 	} 
 }
 
@@ -129,7 +136,7 @@ void Timer_handleEvent(void * self, Event * event) {
 			double elapsedMillis = *(double *)event->data;
 			timer->timeCounter -= 1;
 			if (timer->timeCounter % 10 == 0) {
-				printf("\nTimer [%i]: %i {%lf}\n", timer->id, timer->timeCounter, elapsedMillis); 
+				printf("\nTimer [%i]: %i {%.1lf}\n", timer->id, timer->timeCounter, elapsedMillis); 
 			}
 			if (timer->timeCounter == 0) {
 				printf("\nTimer [%i] COMPLETED!\n", timer->id); 
