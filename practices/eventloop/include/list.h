@@ -1,9 +1,7 @@
 /** @file
     @brief Generic list abstract data type
 */
-
-#ifndef GENERIC_LIST_H
-#define GENERIC_LIST_H
+#pragma once
 
 #include <stdlib.h>
 #include <stdbool.h>
@@ -98,5 +96,3 @@ void List_clear(List * self);
     @brief returns a List Enumerator to iterate over List elements
 */
 // Enumerator * List_getEnumerator(List * self);
-
-#endif /* end of include guard: GENERIC_LIST_H */

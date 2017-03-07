@@ -2,8 +2,7 @@
     @brief EventSystem Interface
 */
 
-#ifndef MODULE_H
-#define MODULE_H
+#pragma once
 
 typedef struct Event Event;
 
@@ -95,5 +94,3 @@ typedef enum {
 	StartEventTypeId = 1,
 	RemoveHandlerEventTypeId = 767456
 } BaseEventTypes;
-
-#endif
