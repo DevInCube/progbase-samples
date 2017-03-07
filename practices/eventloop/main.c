@@ -3,7 +3,6 @@
 #include <time.h>
 #include <list.h>
 #include <events.h>
-#include <progbase.h>
 #include <pbconsole.h>
 
 typedef struct KeyInputEvent KeyInputEvent;
@@ -35,6 +34,12 @@ void InputManager_update(void * self, Event * event);
 void CustomHandler_handleEvent(void * self, Event * event);
 void Timer_handleEvent(void * self, Event * event);
 
+typedef struct Timer Timer;
+struct Timer {
+	int id;
+	int timeCounter;
+};
+
 int main(void) {
 	EventSystem_init();
 
@@ -42,29 +47,13 @@ int main(void) {
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
 	int spaceHitCounter = 0;
 	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, CustomHandler_handleEvent));
-	int timeCounter = 100;
-	EventSystem_addHandler(HandlerObject_new(&timeCounter, NULL, Timer_handleEvent));
+	Timer timer = {
+		.id = 0,
+		.timeCounter = 100
+	};
+	EventSystem_addHandler(HandlerObject_new(&timer, NULL, Timer_handleEvent));
 
-	EventSystem_raiseEvent(Event_new(NULL, StartEventTypeId, NULL, NULL));
-	bool isRunning = true;
-	while (isRunning) {
-		EventSystem_raiseEvent(Event_new(NULL, UpdateEventTypeId, NULL, NULL));
-		
-		Event * event = NULL;
-		while((event = EventSystem_getNextEvent()) != NULL) {
-			HandlerObjectEnumerator * handlersEnum = EventSystem_getHandlers();
-			HandlerObject * handler = NULL;
-			while((handler = HandlerObjectEnumerator_getNextHandler(handlersEnum)) != NULL) {
-				HandlerObject_handleEvent(handler, event);
-			}
-			HandlerObjectEnumerator_free(&handlersEnum);
-			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
-				isRunning = false;
-			}
-			Event_free(&event);
-		}
-		sleepMillis(33);  // ~ 30 FPS
-	}
+	EventSystem_loop();
 	EventSystem_deinit();
 	return 0;
 }
@@ -110,8 +99,9 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 				EventSystem_raiseEvent(Event_new(self, CustomEventTypeId, NULL, NULL));
 			}
 			if (keyEvent->keyCode == 'a') {
-				int * timer = malloc(sizeof(int));
-				*timer = 50;
+				Timer * timer = malloc(sizeof(Timer));
+				timer->id = rand() % 100;
+				timer->timeCounter = 50;
 				EventSystem_addHandler(HandlerObject_new(timer, free, Timer_handleEvent));
 			}
 			if (keyEvent->keyCode == 'q') {
@@ -133,13 +123,13 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 void Timer_handleEvent(void * self, Event * event) {
 	switch(event->type) {
 		case UpdateEventTypeId: {
-			int * timePtr = (int *)self;
-			*timePtr -= 1;
-			if (*timePtr % 10 == 0) {
-				printf("\nTimer: %i\n", *timePtr); 
+			Timer * timer = (Timer *)self;
+			timer->timeCounter -= 1;
+			if (timer->timeCounter % 10 == 0) {
+				printf("\nTimer [%i]: %i\n", timer->id, timer->timeCounter); 
 			}
-			if (*timePtr == 0) {
-				printf("\nTimer COMPLETED!\n"); 
+			if (timer->timeCounter == 0) {
+				printf("\nTimer [%i] COMPLETED!\n", timer->id); 
 				EventSystem_raiseEvent(Event_new(self, RemoveHandlerEventTypeId, self, NULL));
 			}
 			break;

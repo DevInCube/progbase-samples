@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <string.h>
 #include <list.h>
-
+#include <progbase.h>
 #include <events.h>
 #include <fs.h>
 
@@ -177,4 +177,27 @@ void EventSystem_deinit(void) {
 		HandlerObject_free(&handler);
 	}
 	List_free(&g_eventSystem->handlers);
+}
+
+void EventSystem_loop(void) {
+	EventSystem_raiseEvent(Event_new(NULL, StartEventTypeId, NULL, NULL));
+	bool isRunning = true;
+	while (isRunning) {
+		EventSystem_raiseEvent(Event_new(NULL, UpdateEventTypeId, NULL, NULL));
+		
+		Event * event = NULL;
+		while((event = EventSystem_getNextEvent()) != NULL) {
+			HandlerObjectEnumerator * handlersEnum = EventSystem_getHandlers();
+			HandlerObject * handler = NULL;
+			while((handler = HandlerObjectEnumerator_getNextHandler(handlersEnum)) != NULL) {
+				HandlerObject_handleEvent(handler, event);
+			}
+			HandlerObjectEnumerator_free(&handlersEnum);
+			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
+				isRunning = false;
+			}
+			Event_free(&event);
+		}
+		sleepMillis(33);  // ~ 30 FPS
+	}
 }

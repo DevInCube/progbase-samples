@@ -42,6 +42,7 @@ typedef struct HandlerObjectEnumerator HandlerObjectEnumerator;
 
 void EventSystem_init(void);
 void EventSystem_deinit(void);
+void EventSystem_loop(void);
 void EventSystem_addHandler(HandlerObject * handler);
 void EventSystem_removeHandler(void * handler);
 void EventSystem_raiseEvent(Event * event);
