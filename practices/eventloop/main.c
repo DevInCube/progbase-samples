@@ -5,13 +5,14 @@
 #include <events.h>
 #include <pbconsole.h>
 
-enum { 
+enum {
 	KeyInputEventTypeId = 47578,
 	RandomNumberEventTypeId = 134134,
 	CustomEventTypeId = 124090
 };
 
 void RandomEventGen_update(void * self, Event * event);
+void TestUpdate_update(void * self, Event * event);
 void InputManager_update(void * self, Event * event);
 void CustomHandler_handleEvent(void * self, Event * event);
 void Timer_handleEvent(void * self, Event * event);
@@ -27,8 +28,9 @@ int main(void) {
 	EventSystem_init();
 
 	// add event handlers
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, TestUpdate_update));
 	EventSystem_addHandler(HandlerObject_new(NULL, NULL, InputManager_update));
+	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomEventGen_update));
 	int spaceHitCounter = 0;
 	EventSystem_addHandler(HandlerObject_new(&spaceHitCounter, NULL, HitCounter_handleEvent));
 	Timer timer = {
@@ -44,6 +46,26 @@ int main(void) {
 	return 0;
 }
 
+void TestUpdate_update(void * self, Event * event) {
+	switch (event->type) {
+		case StartEventTypeId: {
+			puts("<<<START!>>>");
+			break;
+		}
+		case UpdateEventTypeId: {
+			putchar('.');
+			break;
+		}
+	}
+}
+
+void InputManager_update(void * self, Event * event) {
+	if (conIsKeyDown()) {
+		char * keyCode = malloc(sizeof(char));
+		*keyCode = getchar();
+		EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));
+	}
+}
 
 void RandomEventGen_update(void * self, Event * event) {
 	if (event->type == StartEventTypeId) {
@@ -53,14 +75,6 @@ void RandomEventGen_update(void * self, Event * event) {
 		int * number = malloc(sizeof(int));
 		*number = rand() % 200 - 100;
 		EventSystem_raiseEvent(Event_new(self, RandomNumberEventTypeId, number, free));
-	}
-}
-
-void InputManager_update(void * self, Event * event) {
-	if (conIsKeyDown()) {
-		char * keyCode = malloc(sizeof(char));
-		*keyCode = getchar();
-		EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));
 	}
 }
 
@@ -77,14 +91,6 @@ void HitCounter_handleEvent(void * self, Event * event) {
 
 void CustomHandler_handleEvent(void * self, Event * event) {
 	switch (event->type) {
-		case StartEventTypeId: {
-			puts("START!");
-			break;
-		}
-		case UpdateEventTypeId: {
-			putchar('.');
-			break;
-		}
 		case RandomNumberEventTypeId: {
 			int * number = (int *)event->data;
 			printf("Random number %i\n", *number);
