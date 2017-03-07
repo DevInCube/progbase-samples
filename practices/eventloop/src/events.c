@@ -113,7 +113,7 @@ typedef enum {
 
 /**
 	@class EventHandlerEnumerator
-	@brief an Enumerator (Iterator) to access all handlers in EventSystem
+	@brief an Enumerator (Iterator) to access List items of EventHandler type in EventSystem
 */
 typedef struct EventHandlerEnumerator EventHandlerEnumerator;
 
