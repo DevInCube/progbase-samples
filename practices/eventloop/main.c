@@ -28,17 +28,17 @@ int main(void) {
 	EventSystem_init();
 
 	// add event handlers
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, UpdatePrintHandler_update));
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, KeyInputHandler_update));
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, RandomNumberGenerator_update));
+	EventSystem_addHandler(EventHandler_new(NULL, NULL, UpdatePrintHandler_update));
+	EventSystem_addHandler(EventHandler_new(NULL, NULL, KeyInputHandler_update));
+	EventSystem_addHandler(EventHandler_new(NULL, NULL, RandomNumberGenerator_update));
 	int * spaceHitCounter = malloc(sizeof(int));
 	*spaceHitCounter = 0;
-	EventSystem_addHandler(HandlerObject_new(spaceHitCounter, free, HitCounter_handleEvent));
+	EventSystem_addHandler(EventHandler_new(spaceHitCounter, free, HitCounter_handleEvent));
 	Timer * timer = malloc(sizeof(Timer));
 	timer->id = 0;
 	timer->timeCounter = 100;
-	EventSystem_addHandler(HandlerObject_new(timer, NULL, Timer_handleEvent));
-	EventSystem_addHandler(HandlerObject_new(NULL, NULL, CustomHandler_handleEvent));
+	EventSystem_addHandler(EventHandler_new(timer, NULL, Timer_handleEvent));
+	EventSystem_addHandler(EventHandler_new(NULL, NULL, CustomHandler_handleEvent));
 
 	// start infinite event loop
 	EventSystem_loop();
@@ -112,7 +112,7 @@ void CustomHandler_handleEvent(void * self, Event * event) {
 				Timer * timer = malloc(sizeof(Timer));
 				timer->id = rand() % 100;
 				timer->timeCounter = 50;
-				EventSystem_addHandler(HandlerObject_new(timer, free, Timer_handleEvent));
+				EventSystem_addHandler(EventHandler_new(timer, free, Timer_handleEvent));
 			}
 			if (keyCode == 'q') {
 				EventSystem_raiseEvent(Event_new(self, ExitEventTypeId, NULL, NULL));

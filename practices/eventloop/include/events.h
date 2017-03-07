@@ -8,10 +8,10 @@
 typedef struct Event Event;
 
 /**
-	@typedef Destructor
+	@typedef DestructorFunction
 	@brief a pointer type for functions that can free generic pointed data
 */
-typedef void (*Destructor)(void * dataPtr);
+typedef void (*DestructorFunction)(void * data);
 
 /**
 	@struct Event
@@ -21,32 +21,32 @@ struct Event {
 	void * sender;  /**< pointer to an actor that have raised this event */
 	int type;  /**< an identifier of event type  */
 	void * data;  /**< pointer to custom event data of type depending on event type */
-	Destructor destructor;  /**< a callback function pointer to call to free data */
+	DestructorFunction destructor;  /**< a callback function pointer to call to free data */
 };
 
-Event * Event_new(void * sender, int type, void * data, Destructor dest);
+Event * Event_new(void * sender, int type, void * data, DestructorFunction dest);
 void Event_free(Event ** selfPtr);
 
 /**
-	@typedef EventHandler
+	@typedef EventHandlerFunction
 	@brief a type for callback functions to call on actors on event occurance
 	@param self - actor data pointer
 	@param event - newly raised event
 */
-typedef void (*EventHandler)(void * self, Event * event);
+typedef void (*EventHandlerFunction)(void * self, Event * event);
 
 /**
-	@typedef HandlerObject
+	@typedef EventHandler
 	@brief a container for actor information
 */
-typedef struct HandlerObject HandlerObject;
+typedef struct EventHandler EventHandler;
 
 /**
 	@param data - an actor data pointer
-	@param dest - a destructor function pointer to call on self data free
-	@param handler - an EventHandler callback to handle events for data actor
+	@param dest - a DestructorFunction function pointer to call on self data free
+	@param handler - an EventHandlerFunction callback to handle events for data actor
 */
-HandlerObject * HandlerObject_new(void * data, Destructor dest, EventHandler handler);
+EventHandler * EventHandler_new(void * data, DestructorFunction dest, EventHandlerFunction handler);
 
 /**
 	@brief initialize all EventSystem data
@@ -63,7 +63,7 @@ void EventSystem_loop(void);
 /**
 	@brief add new EventSystem actor
 */
-void EventSystem_addHandler(HandlerObject * handler);
+void EventSystem_addHandler(EventHandler * handler);
 /**
 	@brief remove new EventSystem actor by it's data pointer'
 */

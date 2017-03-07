@@ -74,7 +74,7 @@ int EventQueue_size(EventQueue * self) {
 	return List_count(self->list);
 }
 
-Event * Event_new(void * sender, int type, void * data, Destructor dest) {
+Event * Event_new(void * sender, int type, void * data, DestructorFunction dest) {
 	Event * self = malloc(sizeof(struct Event));
 	self->sender = sender;
 	self->type = type;
@@ -116,7 +116,7 @@ typedef struct HandlerObjectEnumerator HandlerObjectEnumerator;
 bool EventSystem_handleEvent(Event * event);
 Event * EventSystem_getNextEvent(void);
 HandlerObjectEnumerator * EventSystem_getHandlers(void);
-HandlerObject * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self);
+EventHandler * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self);
 void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr);
 
 typedef struct EventSystem EventSystem;
@@ -126,25 +126,25 @@ static EventSystem * g_eventSystem = &(EventSystem) { NULL, NULL };
 /**
 	@brief a structure that holds infomation about system actors
 */
-struct HandlerObject {
+struct EventHandler {
 	void * self;  /**< a pointer to an actor data */
-	Destructor destructor;  /**< a pointer to function that will be called to free self data*/
-	EventHandler handler;  /**< a pointer to function that will call on self events handle */
+	DestructorFunction destructor;  /**< a pointer to function that will be called to free self data*/
+	EventHandlerFunction handler;  /**< a pointer to function that will call on self events handle */
 };
 
-void HandlerObject_handleEvent(HandlerObject * self, Event * event);
-void HandlerObject_free(HandlerObject ** selfPtr);
+void EventHandler_handleEvent(EventHandler * self, Event * event);
+void EventHandler_free(EventHandler ** selfPtr);
 
-HandlerObject * HandlerObject_new(void * data, Destructor dest, EventHandler handler) {
-	HandlerObject * self = malloc(sizeof(HandlerObject));
+EventHandler * EventHandler_new(void * data, DestructorFunction dest, EventHandlerFunction handler) {
+	EventHandler * self = malloc(sizeof(EventHandler));
 	self->self = data;
 	self->destructor = dest;
 	self->handler = handler; 
 	return self;
 }
 
-void HandlerObject_free(HandlerObject ** selfPtr) {
-	HandlerObject * self = *selfPtr;
+void EventHandler_free(EventHandler ** selfPtr) {
+	EventHandler * self = *selfPtr;
 	if (self->destructor != NULL && self->self != NULL) {
 		self->destructor(self->self);
 	}
@@ -152,7 +152,7 @@ void HandlerObject_free(HandlerObject ** selfPtr) {
 	*selfPtr = NULL;
 }
 
-void HandlerObject_handleEvent(HandlerObject * self, Event * event) {
+void EventHandler_handleEvent(EventHandler * self, Event * event) {
 	self->handler(self->self, event);
 }
 
@@ -176,7 +176,7 @@ void HandlerObjectEnumerator_free(HandlerObjectEnumerator ** selfPtr) {
 	*selfPtr = NULL;
 }
 
-HandlerObject * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self) {
+EventHandler * HandlerObjectEnumerator_getNextHandler(HandlerObjectEnumerator * self) {
 	if (self->index >= List_count(self->handlers)) return NULL;
 	return List_get(self->handlers, self->index++);
 }
@@ -200,7 +200,7 @@ bool EventSystem_handleEvent(Event * event) {
 	return EventSystemActionContinue;
 }
 
-void EventSystem_addHandler(HandlerObject * handler) {
+void EventSystem_addHandler(EventHandler * handler) {
 	List_add(g_eventSystem->handlers, handler);
 }
 
@@ -213,9 +213,9 @@ void EventSystem_raiseEvent(Event * event) {
 }
 
 static void __removeHandlerWithData(void * data) {
-	HandlerObject * handlerToRemove = NULL;	
+	EventHandler * handlerToRemove = NULL;	
 	for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
-		HandlerObject * handler = List_get(g_eventSystem->handlers, i);
+		EventHandler * handler = List_get(g_eventSystem->handlers, i);
 		if (handler->self == data) {
 			handlerToRemove = handler;
 			break;
@@ -223,7 +223,7 @@ static void __removeHandlerWithData(void * data) {
 	}
 	if (handlerToRemove != NULL) {
 		List_remove(g_eventSystem->handlers, handlerToRemove);
-		HandlerObject_free(&handlerToRemove);
+		EventHandler_free(&handlerToRemove);
 	}
 }
 
@@ -239,8 +239,8 @@ void EventSystem_deinit(void) {
 	}
 	EventQueue_free(&g_eventSystem->events);
 	for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
-		HandlerObject * handler = List_get(g_eventSystem->handlers, i);
-		HandlerObject_free(&handler);
+		EventHandler * handler = List_get(g_eventSystem->handlers, i);
+		EventHandler_free(&handler);
 	}
 	List_free(&g_eventSystem->handlers);
 }
@@ -262,9 +262,9 @@ void EventSystem_loop(void) {
 		Event * event = NULL;
 		while((event = EventSystem_getNextEvent()) != NULL) {
 			HandlerObjectEnumerator * handlersEnum = EventSystem_getHandlers();
-			HandlerObject * handler = NULL;
+			EventHandler * handler = NULL;
 			while((handler = HandlerObjectEnumerator_getNextHandler(handlersEnum)) != NULL) {
-				HandlerObject_handleEvent(handler, event);
+				EventHandler_handleEvent(handler, event);
 			}
 			HandlerObjectEnumerator_free(&handlersEnum);
 			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
