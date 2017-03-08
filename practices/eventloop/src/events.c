@@ -78,7 +78,7 @@ int EventQueue_size(EventQueue * self) {
 	return List_count(self->list);
 }
 
-Event * Event_new(void * sender, int type, void * data, DestructorFunction dest) {
+Event * Event_new(EventHandler * sender, int type, void * data, DestructorFunction dest) {
 	Event * self = malloc(sizeof(struct Event));
 	self->sender = sender;
 	self->type = type;

@@ -4,7 +4,15 @@
 
 #pragma once
 
+/**
+	@typedef Event
+*/
 typedef struct Event Event;
+/**
+	@typedef EventHandler
+	@brief a container for event handler information
+*/
+typedef struct EventHandler EventHandler;
 
 /**
 	@typedef DestructorFunction
@@ -17,20 +25,14 @@ typedef void (*DestructorFunction)(void * data);
 	@brief a structure that holds information about an event occured
 */
 struct Event {
-	void * sender;  /**< pointer to an event handler that have raised this event */
+	EventHandler * sender;  /**< pointer to an event handler that have raised this event */
 	int type;  /**< an identifier of event type  */
 	void * data;  /**< pointer to custom event data of type depending on event type */
 	DestructorFunction destructor;  /**< a callback function pointer to call to free data */
 };
 
-Event * Event_new(void * sender, int type, void * data, DestructorFunction dest);
+Event * Event_new(EventHandler * sender, int type, void * data, DestructorFunction dest);
 void Event_free(Event ** dataPtr);
-
-/**
-	@typedef EventHandler
-	@brief a container for event handler information
-*/
-typedef struct EventHandler EventHandler;
 
 /**
 	@typedef EventHandlerFunction
