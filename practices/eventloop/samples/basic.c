@@ -3,7 +3,6 @@
 #include <time.h>
 #include <list.h>
 #include <events.h>
-#include <progbase.h>
 #include <pbconsole.h>
 
 /* custom constant event type ids*/
@@ -31,18 +30,5 @@ int main(void) {
 /* event handlers functions implementations */
 
 void CustomHandler_update(EventHandler * self, Event * event) {
-	switch (event->type) {
-		case StartEventTypeId : {
-			printf("START!\n");
-			break;
-		}
-		case UpdateEventTypeId : {
-			void * data = event->data;
-			double updateMillis = *(double *)data;
-			printf("Update event with data: %.1lf millis\n", updateMillis);
-			fflush(stdout);
-			sleepMillis(1000);
-			break;
-		}
-	}
+	// @todo implement
 }
