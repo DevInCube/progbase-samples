@@ -9,6 +9,8 @@
 #include <fs.h>
 #include <time.h>
 
+void Event_free(Event ** dataPtr);
+
 /**
     @struct Clock
     @brief encapsulates clock data

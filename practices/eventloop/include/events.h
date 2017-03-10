@@ -31,8 +31,18 @@ struct Event {
 	DestructorFunction destructor;  /**< a callback function pointer to call to free data */
 };
 
-Event * Event_new(EventHandler * sender, int type, void * data, DestructorFunction dest);
-void Event_free(Event ** dataPtr);
+/** 
+	@brief a new Event constructor with parameters
+	@param sender - who generated this event
+	@param type - event type
+	@param data - pointer to specific event data
+	@param destructor - destructor function for data
+*/
+Event * Event_new(
+	EventHandler * sender, 
+	int type, 
+	void * data, 
+	DestructorFunction destructor);
 
 /**
 	@typedef EventHandlerFunction
