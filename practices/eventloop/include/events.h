@@ -37,10 +37,10 @@ void Event_free(Event ** dataPtr);
 /**
 	@typedef EventHandlerFunction
 	@brief a type for callback functions to call on event handlers on event occurance
-	@param data - event handler data pointer
+	@param self - event handler data pointer
 	@param event - newly raised event
 */
-typedef void (*EventHandlerFunction)(EventHandler * data, Event * event);
+typedef void (*EventHandlerFunction)(EventHandler * self, Event * event);
 
 /**
 	@brief a structure that holds infomation about system event handlers
