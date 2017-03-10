@@ -71,7 +71,7 @@ void EventSystem_init(void);
 /**
 	@brief cleanup all EventSystem data
 */
-void EventSystem_deinit(void);
+void EventSystem_cleanup(void);
 /**
 	@brief start infinite event loop
 */

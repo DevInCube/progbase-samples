@@ -25,7 +25,7 @@ int main(void) {
 	// start infinite event loop
 	EventSystem_loop();
 	// cleanup event system
-	EventSystem_deinit();
+	EventSystem_cleanup();
 	return 0;
 }
 

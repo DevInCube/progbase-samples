@@ -219,7 +219,7 @@ void EventSystem_init(void) {
 	g_eventSystem->events = EventQueue_new();
 }
 
-void EventSystem_deinit(void) {
+void EventSystem_cleanup(void) {
 	while (EventQueue_size(g_eventSystem->events) > 0) {
 		Event * event = EventQueue_dequeue(g_eventSystem->events);
 		Event_free(&event);
