@@ -62,6 +62,8 @@ EventHandler * EventHandler_new(
 	DestructorFunction destructor, 
 	EventHandlerFunction eventHandler);
 
+/* public EventSystem API */
+
 /**
 	@brief initialize all EventSystem data
 */
@@ -91,8 +93,7 @@ void EventSystem_raiseEvent(Event * event);
 	@brief some base events type ids
 */
 typedef enum { 
-	ExitEventTypeId = -1,
-	UpdateEventTypeId = 0,
-	StartEventTypeId = 1,
-	RemoveHandlerEventTypeId = 767456
+	StartEventTypeId = 1,  /**< the first event generated before event loop start */
+	UpdateEventTypeId = 0,  /**< event is generated in every iteration of event loop */
+	ExitEventTypeId = -1  /**< event to stop event loop */
 } BaseEventTypes;

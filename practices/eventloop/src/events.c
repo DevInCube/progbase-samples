@@ -152,8 +152,6 @@ void EventHandler_handleEvent(EventHandler * self, Event * event) {
 	self->handler(self, event);
 }
 
-static void __removeHandler(EventHandler * handler);
-
 struct EventHandlerEnumerator {
 	List * handlers;
 	int index;
@@ -186,12 +184,20 @@ EventHandlerEnumerator * EventSystem_getHandlers(void) {
 	return EventHandlerEnumerator_new(g_eventSystem->handlers);
 }
 
+enum {
+	RemoveHandlerEventTypeId = 767456
+};
+
 bool EventSystem_handleEvent(Event * event) {
 	if (event->type == ExitEventTypeId) {
 		return EventSystemActionExit;
 	}
 	if (event->type == RemoveHandlerEventTypeId) {
-		__removeHandler(event->data);
+		EventHandler * handler = event->data;
+		if (handler != NULL) {
+			List_remove(g_eventSystem->handlers, handler);
+			EventHandler_free(&handler);
+		}
 	}
 	return EventSystemActionContinue;
 }
@@ -206,13 +212,6 @@ void EventSystem_removeHandler(EventHandler * handler) {
 
 void EventSystem_raiseEvent(Event * event) {
 	EventQueue_enqueue(g_eventSystem->events, event);
-}
-
-static void __removeHandler(EventHandler * handler) {
-	if (handler != NULL) {
-		List_remove(g_eventSystem->handlers, handler);
-		EventHandler_free(&handler);
-	}
 }
 
 void EventSystem_init(void) {
