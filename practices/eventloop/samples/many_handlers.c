@@ -7,9 +7,9 @@
 
 /* custom constant event type ids*/
 enum {
-	KeyInputEventTypeId = 47578,
-	RandomNumberEventTypeId = 134134,
-	CustomEventTypeId = 124090
+	KeyInputEventTypeId,
+	RandomNumberEventTypeId,
+	CustomEventTypeId
 };
 
 /* event handler functions prototypes */
@@ -121,7 +121,7 @@ void CustomHandler_handleEvent(EventHandler * self, Event * event) {
 				EventSystem_addHandler(EventHandler_new(timer, free, Timer_handleEvent));
 			}
 			if (keyCode == 'q') {
-				EventSystem_raiseEvent(Event_new(self, ExitEventTypeId, NULL, NULL));
+				EventSystem_exit();
 			}
 			printf("Key pressed `%c` [%i]\n", keyCode, keyCode);
 			break;
@@ -140,7 +140,7 @@ void Timer_handleEvent(EventHandler * self, Event * event) {
 			}
 			if (timer->timeCounter == 0) {
 				printf("\nTimer #%i: COMPLETED!\n", timer->id); 
-				EventSystem_raiseEvent(Event_new(self, RemoveHandlerEventTypeId, self, NULL));
+				EventSystem_removeHandler(self);
 			}
 			break;
 		}

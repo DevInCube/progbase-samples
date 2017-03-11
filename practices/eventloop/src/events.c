@@ -187,11 +187,12 @@ EventHandlerEnumerator * EventSystem_getHandlers(void) {
 }
 
 enum {
-	RemoveHandlerEventTypeId = 767456
+	RemoveHandlerEventTypeId = ExitEventTypeId + 1,
+	BreakLoopEventTypeId
 };
 
 bool EventSystem_handleEvent(Event * event) {
-	if (event->type == ExitEventTypeId) {
+	if (event->type == BreakLoopEventTypeId) {
 		return EventSystemActionExit;
 	}
 	if (event->type == RemoveHandlerEventTypeId) {
@@ -266,6 +267,10 @@ void EventSystem_loop(void) {
         if (millis < millisPerFrame) sleepMillis(millisPerFrame - millis);
         lastTicks = current;
 	}
+}
+
+void EventSystem_exit(void) {
+	EventSystem_raiseEvent(Event_new(NULL, BreakLoopEventTypeId, NULL, NULL));
 }
 
 Clock Clock_now(void) {

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <limits.h>
+
 /**
 	@typedef Event
 */
@@ -87,6 +89,10 @@ void EventSystem_cleanup(void);
 */
 void EventSystem_loop(void);
 /**
+	@brief stops infinite event loop
+*/
+void EventSystem_exit(void);
+/**
 	@brief add new EventSystem event handler
 */
 void EventSystem_addHandler(EventHandler * handler);
@@ -103,7 +109,7 @@ void EventSystem_raiseEvent(Event * event);
 	@brief some base events type ids
 */
 typedef enum { 
-	StartEventTypeId = 1,  /**< the first event generated before event loop start */
-	UpdateEventTypeId = 0,  /**< event is generated in every iteration of event loop */
-	ExitEventTypeId = -1  /**< event to stop event loop */
+	StartEventTypeId = INT_MIN,  /**< the first event generated before event loop start */
+	UpdateEventTypeId,  /**< event is generated in every iteration of event loop */
+	ExitEventTypeId  /**< event to stop event loop */
 } BaseEventTypes;
