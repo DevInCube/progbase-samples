@@ -35,7 +35,7 @@ void KeyInputHandler_update(EventHandler * self, Event * event) {
 	if (conIsKeyDown()) {  // non-blocking key input check
 		char * keyCode = malloc(sizeof(char));
 		*keyCode = getchar();
-		if (*keyCode == 27) {  // Escape key
+		if (*keyCode == 27) {  // Escape key code
 			EventSystem_exit();	
 		} else {
 			EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));

@@ -4,7 +4,7 @@ A simple event system written in C language to perform basic Event-Driven Progra
 
 ## Updates
 
-Addeed new API function `EventSystem_exit()` to break EventLoop easily.
+Added new API function `EventSystem_exit()` to break EventLoop easily.
 
 ## Main types
 

@@ -154,6 +154,8 @@ void EventHandler_handleEvent(EventHandler * self, Event * event) {
 	self->handler(self, event);
 }
 
+/* EventHandlerEnumerator */
+
 struct EventHandlerEnumerator {
 	List * handlers;
 	int index;
@@ -185,6 +187,8 @@ Event * EventSystem_getNextEvent(void) {
 EventHandlerEnumerator * EventSystem_getHandlers(void) {
 	return EventHandlerEnumerator_new(g_eventSystem->handlers);
 }
+
+/* EventSystem implementations */
 
 enum {
 	RemoveHandlerEventTypeId = ExitEventTypeId + 1,
@@ -274,6 +278,8 @@ void EventSystem_loop(void) {
 void EventSystem_exit(void) {
 	EventSystem_raiseEvent(Event_new(NULL, BreakLoopEventTypeId, NULL, NULL));
 }
+
+/* Clock implementations */
 
 Clock Clock_now(void) {
     Clock clock;
