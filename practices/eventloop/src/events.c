@@ -251,14 +251,16 @@ void EventSystem_loop(void) {
 		
 		Event * event = NULL;
 		while((event = EventSystem_getNextEvent()) != NULL) {
-			EventHandlerEnumerator * handlersEnum = EventSystem_getHandlers();
-			EventHandler * handler = NULL;
-			while((handler = EventHandlerEnumerator_getNextHandler(handlersEnum)) != NULL) {
-				EventHandler_handleEvent(handler, event);
-			}
-			EventHandlerEnumerator_free(&handlersEnum);
 			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
 				isRunning = false;
+				EventSystem_raiseEvent(Event_new(NULL, ExitEventTypeId, NULL, NULL));
+			} else {
+				EventHandlerEnumerator * handlersEnum = EventSystem_getHandlers();
+				EventHandler * handler = NULL;
+				while((handler = EventHandlerEnumerator_getNextHandler(handlersEnum)) != NULL) {
+					EventHandler_handleEvent(handler, event);
+				}
+				EventHandlerEnumerator_free(&handlersEnum);
 			}
 			Event_free(&event);
 		}

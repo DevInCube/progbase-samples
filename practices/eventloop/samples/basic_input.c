@@ -7,7 +7,7 @@
 
 /* custom constant event type ids*/
 enum {
-	KeyInputEventTypeId = 47578
+	KeyInputEventTypeId
 };
 
 /* event handler functions prototypes */
@@ -36,7 +36,7 @@ void KeyInputHandler_update(EventHandler * self, Event * event) {
 		char * keyCode = malloc(sizeof(char));
 		*keyCode = getchar();
 		if (*keyCode == 27) {  // Escape key
-			EventSystem_raiseEvent(Event_new(self, ExitEventTypeId, keyCode, free));	
+			EventSystem_exit();	
 		} else {
 			EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCode, free));
 		}

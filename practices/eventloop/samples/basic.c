@@ -7,7 +7,7 @@
 
 /* custom constant event type ids*/
 enum {
-	CustomEventTypeId = 47578
+	CustomEventTypeId
 };
 
 /* event handler functions prototypes */

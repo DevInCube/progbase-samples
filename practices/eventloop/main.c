@@ -55,11 +55,19 @@ int main(void) {
 void UpdatePrintHandler_update(EventHandler * self, Event * event) {
 	switch (event->type) {
 		case StartEventTypeId: {
+			puts("");
 			puts("<<<START!>>>");
+			puts("");
 			break;
 		}
 		case UpdateEventTypeId: {
 			putchar('.');
+			break;
+		}
+		case ExitEventTypeId: {
+			puts("");
+			puts("<<<EXIT!>>>");
+			puts("");
 			break;
 		}
 	}
