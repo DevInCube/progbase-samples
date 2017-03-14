@@ -30,7 +30,7 @@ void EventSystem::loop() {
 				handler->handleEvent(event);
 			} 
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(33));
+		this_thread::sleep_for(chrono::milliseconds(33));
 	}
 }
 

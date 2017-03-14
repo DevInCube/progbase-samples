@@ -38,14 +38,14 @@ void Array_copy(
 #define throw(MSG) assert(0 && MSG);
 
 struct List {
-    size_t capacity;
-    size_t size;
+    int capacity;
+    int size;
     void ** items;    /**< holds a pointer to items array */
 };
 
 static const int initialCapacity = 4;
 
-static void __ensureCapacity(List * self, size_t min);
+static void __ensureCapacity(List * self, int min);
 
 List * List_new(void) {
 	List * self = malloc(sizeof(struct List));
@@ -155,7 +155,7 @@ void List_clear(List * self) {
     }
 }
 
-static void __ensureCapacity(List * self, size_t min) {
+static void __ensureCapacity(List * self, int min) {
     if (self->size <= min) {
         int newCapacity = self->size == 0 ? initialCapacity : self->size * 2;
         if (newCapacity < min) newCapacity = min;
