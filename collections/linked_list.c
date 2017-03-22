@@ -37,7 +37,7 @@ void LinkedList_remove(LinkedList * self, int index);
 
 struct LinkedList {
     struct ListNode * next;
-    Human * data;
+    Human * data;  
 };
 
 struct Human {
