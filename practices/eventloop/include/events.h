@@ -61,7 +61,7 @@ struct EventHandler {
 	void * data;  /**< a pointer to an event handler data */
 	DestructorFunction destructor;  /**< a pointer to function that will be called to free data data*/
 	EventHandlerFunction handler;  /**< a pointer to function that will call on data events handle */
-	int _refCount;
+	int _refCount;  /**< private reference counter */
 };
 
 
@@ -75,8 +75,16 @@ EventHandler * EventHandler_new(
 	DestructorFunction destructor, 
 	EventHandlerFunction eventHandler);
 
-void EventHandler_incref(EventHandler * handler);
-void EventHandler_decref(EventHandler * handler);
+/**
+	@brief reference counting reference increase
+*/
+void EventHandler_incref(EventHandler * self);
+
+/**
+	@brief reference counting reference decrease
+	free's handler when reference counter is 0
+*/
+void EventHandler_decref(EventHandler * self);
 
 /* public EventSystem API */
 
