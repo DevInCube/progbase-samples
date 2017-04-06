@@ -61,6 +61,7 @@ struct EventHandler {
 	void * data;  /**< a pointer to an event handler data */
 	DestructorFunction destructor;  /**< a pointer to function that will be called to free data data*/
 	EventHandlerFunction handler;  /**< a pointer to function that will call on data events handle */
+	int _refCount;
 };
 
 
@@ -73,6 +74,9 @@ EventHandler * EventHandler_new(
 	void * data, 
 	DestructorFunction destructor, 
 	EventHandlerFunction eventHandler);
+
+void EventHandler_incref(EventHandler * handler);
+void EventHandler_decref(EventHandler * handler);
 
 /* public EventSystem API */
 

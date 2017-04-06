@@ -130,7 +130,6 @@ typedef struct EventSystem EventSystem;
 static EventSystem * g_eventSystem = &(EventSystem) { NULL, NULL };
 
 void EventHandler_handleEvent(EventHandler * self, Event * event);
-void EventHandler_free(EventHandler ** selfPtr);
 
 EventHandler * EventHandler_new(void * data, DestructorFunction dest, EventHandlerFunction handler) {
 	if (data != NULL && dest == NULL) assert(0 && "destructor for non-null data is null");
@@ -138,16 +137,23 @@ EventHandler * EventHandler_new(void * data, DestructorFunction dest, EventHandl
 	self->data = data;
 	self->destructor = dest;
 	self->handler = handler; 
+	self->_refCount = 1;
 	return self;
 }
 
-void EventHandler_free(EventHandler ** selfPtr) {
-	EventHandler * self = *selfPtr;
-	if (self->destructor != NULL && self->data != NULL) {
-		self->destructor(self->data);
+void EventHandler_incref(EventHandler * self) {
+	self->_refCount++;
+}
+
+void EventHandler_decref(EventHandler * self) {
+	self->_refCount--;
+	if (0 == self->_refCount) {
+		// free
+		if (self->destructor != NULL && self->data != NULL) {
+			self->destructor(self->data);
+		}
+		free(self);
 	}
-	free(self);
-	*selfPtr = NULL;
 }
 
 void EventHandler_handleEvent(EventHandler * self, Event * event) {
@@ -203,7 +209,7 @@ bool EventSystem_handleEvent(Event * event) {
 		EventHandler * handler = event->data;
 		if (handler != NULL) {
 			List_remove(g_eventSystem->handlers, handler);
-			EventHandler_free(&handler);
+			EventHandler_decref(handler);
 		}
 	}
 	return EventSystemActionContinue;
@@ -238,7 +244,7 @@ void EventSystem_cleanup(void) {
 	EventQueue_free(&g_eventSystem->events);
 	for (int i = 0; i < List_count(g_eventSystem->handlers); i++) {
 		EventHandler * handler = List_get(g_eventSystem->handlers, i);
-		EventHandler_free(&handler);
+		EventHandler_decref(handler);
 	}
 	List_free(&g_eventSystem->handlers);
 }
