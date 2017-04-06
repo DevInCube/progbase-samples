@@ -45,7 +45,7 @@ void Timer_handleEvent(EventHandler * self, Event * event) {
 				double * elapsedPtr = malloc(sizeof(double));
 				*elapsedPtr = timer->elapsedMillis;
 				//printf(">>> TIMER ELAPSED!!!!\n");
-				EventSystem_raiseEvent(Event_new(
+				EventSystem_emit(Event_new(
 					self, 
 					TimerElapsedEventTypeId, 
 					elapsedPtr,
@@ -101,7 +101,7 @@ void KeyInputHandler_update(EventHandler * self, Event * event) {
 		} else {
             char * keyCodeData = malloc(sizeof(char));
 		    *keyCodeData = keyCode;
-			EventSystem_raiseEvent(Event_new(self, KeyInputEventTypeId, keyCodeData, free));
+			EventSystem_emit(Event_new(self, KeyInputEventTypeId, keyCodeData, free));
 		}
 	}
 }

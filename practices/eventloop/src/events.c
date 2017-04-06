@@ -214,10 +214,14 @@ void EventSystem_addHandler(EventHandler * handler) {
 }
 
 void EventSystem_removeHandler(EventHandler * handler) {
-	EventSystem_raiseEvent(Event_new(NULL, RemoveHandlerEventTypeId, handler, NULL));
+	EventSystem_emit(Event_new(NULL, RemoveHandlerEventTypeId, handler, NULL));
 }
 
 void EventSystem_raiseEvent(Event * event) {
+	EventQueue_enqueue(g_eventSystem->events, event);
+}
+
+void EventSystem_emit(Event * event) {
 	EventQueue_enqueue(g_eventSystem->events, event);
 }
 
@@ -243,7 +247,7 @@ void EventSystem_loop(void) {
 	const int FPS = 30;
     const double millisPerFrame = 1000 / FPS;
 
-	EventSystem_raiseEvent(Event_new(NULL, StartEventTypeId, NULL, NULL));
+	EventSystem_emit(Event_new(NULL, StartEventTypeId, NULL, NULL));
 	double elapsedMillis = 0;
 	Clock lastTicks = Clock_now();
 	bool isRunning = true;
@@ -251,13 +255,13 @@ void EventSystem_loop(void) {
 		Clock current = Clock_now();
         elapsedMillis = Clock_diffMillis(current, lastTicks);
 
-		EventSystem_raiseEvent(Event_new(NULL, UpdateEventTypeId, &elapsedMillis, NULL));
+		EventSystem_emit(Event_new(NULL, UpdateEventTypeId, &elapsedMillis, NULL));
 		
 		Event * event = NULL;
 		while((event = EventSystem_getNextEvent()) != NULL) {
 			if (EventSystem_handleEvent(event) == EventSystemActionExit) {
 				isRunning = false;
-				EventSystem_raiseEvent(Event_new(NULL, ExitEventTypeId, NULL, NULL));
+				EventSystem_emit(Event_new(NULL, ExitEventTypeId, NULL, NULL));
 			} else {
 				EventHandlerEnumerator * handlersEnum = EventSystem_getHandlers();
 				EventHandler * handler = NULL;
@@ -276,7 +280,7 @@ void EventSystem_loop(void) {
 }
 
 void EventSystem_exit(void) {
-	EventSystem_raiseEvent(Event_new(NULL, BreakLoopEventTypeId, NULL, NULL));
+	EventSystem_emit(Event_new(NULL, BreakLoopEventTypeId, NULL, NULL));
 }
 
 /* Clock implementations */

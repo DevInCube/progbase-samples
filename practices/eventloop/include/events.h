@@ -103,7 +103,9 @@ void EventSystem_removeHandler(EventHandler * handler);
 /**
 	@brief add new event to EventSystem to handle by event handlers
 */
-void EventSystem_raiseEvent(Event * event);
+void EventSystem_raiseEvent(Event * event) 
+	__attribute__((deprecated("use EventSystem_emitEvent() instead")));
+void EventSystem_emit(Event * event);
 
 /**
 	@brief some base events type ids
