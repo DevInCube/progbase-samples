@@ -97,7 +97,8 @@ void EventSystem_exit(void);
 */
 void EventSystem_addHandler(EventHandler * handler);
 /**
-	@brief remove new EventSystem event handler by it's data pointer'
+	@brief remove EventSystem event handler by it's data pointer' 
+	from event system handlers list and destoys it
 */
 void EventSystem_removeHandler(EventHandler * handler);
 /**
@@ -105,6 +106,7 @@ void EventSystem_removeHandler(EventHandler * handler);
 */
 void EventSystem_raiseEvent(Event * event) 
 	__attribute__((deprecated("use EventSystem_emitEvent() instead")));
+
 void EventSystem_emit(Event * event);
 
 /**
