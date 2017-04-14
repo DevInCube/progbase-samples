@@ -3,22 +3,31 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include <progbase/net.h>
 
-#define BUFFER_LEN 1024
-#define MAX_COMMAND_LEN 100
-typedef struct {
-	char command[MAX_COMMAND_LEN];
-} Request;
+#include <request.h>
 
-void processRequest(Request * req, NetMessage * message);
-Request parseRequest(const char * str);
+#define BUFFER_LEN 10240
+
+void numbersHandler(Request * req, NetMessage * message);
+void bitsHandler(Request * req, NetMessage * message);
+void stringsHandler(Request * req, NetMessage * message);
+void strNumHandler(Request * req, NetMessage * message);
+
+static CommandHandler handlers[] = {
+	{ "numbers", numbersHandler},
+	{ "bits", bitsHandler},
+	{ "strings", stringsHandler},
+    { "strnums", strNumHandler},
+};
 
 int main(int argc, char * argv[]) {
 	if (argc < 2) {
 		puts("Please, specify server port in command line arguments");
 		return 1;
 	}
+	srand(time(0));
 	const int port = atoi(argv[1]);
 
 	TcpListener * server = TcpListener_init(&(TcpListener){});
@@ -42,6 +51,7 @@ int main(int argc, char * argv[]) {
     // to store information about current client
     TcpClient client;
     while (1) {
+        puts(">> Waiting for connection...");
 		//
         // wait for someone to connect to server
         TcpListener_accept(server, &client);
@@ -51,71 +61,25 @@ int main(int argc, char * argv[]) {
 			return 1;
 		}
         IpAddress * clientAddress = TcpClient_address(&client);
-        printf("Received message from %s:%d (%d bytes): `%s`\n",
+        printf(">> Received message from %s:%d (%d bytes): `%s`\n",
             IpAddress_address(clientAddress),  // client IP-address
             IpAddress_port(clientAddress),  // client port
             NetMessage_dataLength(message),
             NetMessage_data(message));
 
 		Request req = parseRequest(NetMessage_data(message));
-		processRequest(&req, message);
+		processRequest(&req, message, handlers, sizeof(handlers) / sizeof(handlers[0]));
 		
         // send data back
         if(!TcpClient_send(&client, message)) {
 			perror("send");
 			return 1;
 		}
+        printf(">> String sent to client:\r\n%s\r\n", NetMessage_data(message));
         // close tcp connection
         TcpClient_close(&client);
     }
     // close listener
     TcpListener_close(server);
 	return 0;
-}
-
-typedef void (*RequestHandler)(Request * req, NetMessage * message);
-typedef struct {
-	char command[MAX_COMMAND_LEN];
-	RequestHandler handler;
-} CommandHandler;
-
-void numbersHandler(Request * req, NetMessage * message);
-void bitsHandler(Request * req, NetMessage * message);
-void stringsHandler(Request * req, NetMessage * message);
-
-static CommandHandler handlers[] = {
-	{ "numbers", numbersHandler},
-	{ "bits", bitsHandler},
-	{ "strings", stringsHandler},
-};
-
-RequestHandler getCommandRequestHandler(const char * command) {
-	for (int i = 0; i < sizeof(handlers) / sizeof(handlers[0]); i++) {
-		CommandHandler handler = handlers[i];
-		if (0 == strcmp(handler.command, command)) {
-			return handler.handler;
-		}
-	}
-	return NULL;
-}
-
-void processRequest(Request * req, NetMessage * message) {
-	RequestHandler handler = getCommandRequestHandler(req->command);
-	if (handler == NULL) {
-		NetMessage_setDataString(message, "Command not found");
-		return;
-	}
-	handler(req, message);
-}
-
-Request parseRequest(const char * str) {
-	Request req = {
-		.command = ""
-	};
-	int commandEnd = 0;
-	while (isalpha(str[commandEnd])) commandEnd++;
-	if (commandEnd >= MAX_COMMAND_LEN) commandEnd = MAX_COMMAND_LEN - 1;
-	strncpy(req.command, str, commandEnd);
-	req.command[commandEnd] = 0;
-	return req;
 }
