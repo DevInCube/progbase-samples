@@ -1,11 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 #include <progbase/net.h>
-
-#define BUFFER_LEN 1024
 
 /**
 
@@ -24,59 +22,55 @@
 
 */
 
-typedef struct {
-	char command[100];
+#define BUFFER_LEN 1024
+#define ARRAY_LEN 3
+#define STRING_LEN 10
+
+typedef struct ClientRequest {
+	char action[100];
 	int index;
 	char character;
-} Request;
+} ClientRequest;
 
-Request parseRequest(const char * msgStr) {
-	Request req = {
-		.command = "",
+ClientRequest parseRequest(const char * msgStr) {
+	ClientRequest request = {
+		.action = "",
 		.index = 0,
 		.character = '\0'
 	};
-
-	int n = 0;
-	while(isalpha(msgStr[n])) n++;
-
-	strncpy(req.command, msgStr, n);
-	req.command[n] = '\0';
-
-	char * next = NULL;
-	int index = strtol(msgStr + n, &next, 10);
-	req.index = index;
-
-	if (NULL != next && *next == ' ') {
-		req.character = *(next + 1);
+	int chIndex = 0;
+	while (isalpha(msgStr[chIndex])) {
+		chIndex ++;
 	}
-
-	return req;
+	strncpy(request.action, msgStr, chIndex);
+	char * next = NULL;
+	request.index = strtol(msgStr + chIndex, &next, 10);
+	if (msgStr + chIndex != next) {
+		if (*next == ' ') {
+			request.character = *(next + 1);
+		}
+	}
+	return request;
 }
 
-void printRequest(Request * req) {
-	printf("Request: `%s` `%i` `%c`\n",
-		req->command,
-		req->index,
-		req->character);
+void printRequest(ClientRequest request) {
+	printf("Client request is: `%s` `%i` `%c`\n", 
+		request.action,
+		request.index,
+		request.character);
 }
-
-#define ARRAY_LEN 4
-#define STRING_LEN 10
 
 int main(void) {
-
 	char strings[ARRAY_LEN][STRING_LEN] = {
-		"One",
-		"Two 2",
-		"3 3 3",
-		"Server!"
+		"Hi",
+		"I'm",
+		"Server!!!"
 	};
 
 	//
     // create UDP server
     UdpClient * server = UdpClient_init(&(UdpClient){});
-    IpAddress * address = IpAddress_initAny(&(IpAddress){}, 9999);
+    IpAddress * address = IpAddress_initAny(&(IpAddress){}, 9998);
     if (!UdpClient_bind(server, address)) {
         perror("Can't start server");
         return 1;
@@ -100,32 +94,41 @@ int main(void) {
 			return 1;
 		}
 
-        printf("Received message from %s:%d (%d bytes): `%s`\n",
-            IpAddress_address(&clientAddress),  // client IP-address
-            IpAddress_port(&clientAddress),  // client port
-            NetMessage_dataLength(message),
-            NetMessage_data(message));
-
-		const char * msgStr = NetMessage_data(message);
-		Request req = parseRequest(msgStr);
-		printRequest(&req);
-
-		int index = req.index;
-		if (index < 0 || index >= ARRAY_LEN) {
-			NetMessage_setDataString(message, "Error: index out of bounds");	
+		ClientRequest req = parseRequest(NetMessage_data(message));
+		printRequest(req);
+		if (req.index < 0 || req.index >= ARRAY_LEN) {
+			NetMessage_setDataString(message, "Error: index out of bounds");
 		} else {
-			if (0 == strcmp(req.command, "count")) {
-				char tmp[10] = "";
+			if (0 == strcmp(req.action, "count")) {
+				char tmp[10];
 				sprintf(tmp, "%i", ARRAY_LEN);
 				NetMessage_setDataString(message, tmp);
-			} else if (0 == strcmp(req.command, "get")) {
-				
-				NetMessage_setDataString(message, strings[index]);
+			} else if (0 == strcmp(req.action, "get")) {
+				NetMessage_setDataString(message, strings[req.index]);
+			} else if (0 == strcmp(req.action, "clear")) {
+				strings[req.index][0] = '\0';
+				NetMessage_setDataString(message, strings[req.index]);
+			} else if (0 == strcmp(req.action, "push")) {
+				char * str = strings[req.index];
+				if (strlen(str) >= STRING_LEN - 1) {
+					NetMessage_setDataString(message, "Error: String is full'");
+				} else {
+					str[strlen(str)] = req.character;
+					str[strlen(str) + 1] = '\0';
+					NetMessage_setDataString(message, strings[req.index]);
+				}
+			} else if (0 == strcmp(req.action, "pop")) {
+				char * str = strings[req.index];
+				if (strlen(str) == 0) {
+					NetMessage_setDataString(message, "Error: Can't pop empty string'");
+				} else {
+					str[strlen(str) - 1] = '\0';
+					NetMessage_setDataString(message, strings[req.index]);
+				}
 			} else {
-				NetMessage_setDataString(message, "Error: unrecognized request");
+				NetMessage_setDataString(message, "Error: Unknown request");
 			}
 		}
-
         //
         // send echo response
         if (!UdpClient_sendTo(server, message, &clientAddress)) {

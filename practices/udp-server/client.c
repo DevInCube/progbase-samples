@@ -12,38 +12,37 @@ int main(void) {
     IpAddress * serverAddress = IpAddress_init(
         &(IpAddress){},  // value on stack
         "127.0.0.1",  // server host IP-address (localhost)
-        9998);  // server port
+        9999);  // server port
     
     NetMessage * message = NetMessage_init(
         &(NetMessage){},  // value on stack
         (char[BUFFER_LEN]){},  // array on stack 
-        BUFFER_LEN); 
+        BUFFER_LEN);
 
-	while (1) {
-		char request[100] = "";
-		fgets(request, 100, stdin);
-		NetMessage_setDataString(message, request);
-
-		//
-		// send string to server
-		printf("Send string `%s` to server %s:%d\n",
-			NetMessage_data(message), 
-			IpAddress_address(serverAddress),
-			IpAddress_port(serverAddress));
-		if(!UdpClient_sendTo(client, message, serverAddress)) {
-			perror("send");
-			return 1;
-		}
-		//
-		// receive response from server
-		if(!UdpClient_receiveFrom(client, message, serverAddress)) {
-			perror("recv");
-			return 1;
-		}
-		printf("Response received from server (%d bytes): %s\r\n", 
-			NetMessage_dataLength(message),
-			NetMessage_data(message));
-	}
+    while (1) {
+        char request[100] = "";
+        fgets(request, 100, stdin);
+        NetMessage_setDataString(message, request);
+        //
+        // send string to server
+        printf("Send string `%s` to server %s:%d\n",
+            NetMessage_data(message), 
+            IpAddress_address(serverAddress),
+            IpAddress_port(serverAddress));
+        if(!UdpClient_sendTo(client, message, serverAddress)) {
+            perror("send");
+            return 1;
+        }
+        //
+        // receive response from server
+        if(!UdpClient_receiveFrom(client, message, serverAddress)) {
+            perror("recv");
+            return 1;
+        }
+        printf("Response received from server (%d bytes): %s\r\n", 
+            NetMessage_dataLength(message),
+            NetMessage_data(message));
+    }
     //
     // close client object
     UdpClient_close(client);
