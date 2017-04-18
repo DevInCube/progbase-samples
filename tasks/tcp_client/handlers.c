@@ -1,76 +1,63 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <jansson.h>
 
 #include <request.h>
 
-static void generateRandomNumbersJson(NetMessage * message, int total, int min, int max) {
-	json_t * jarray = json_array();
+static void generateRandomNumbers(Response * res, int total, int min, int max) {
 	while (total-- > 0) {
 		int val = rand() % (max + 1 - min) + min;
-		json_array_append(jarray, json_integer(val));
+		Response_addNumber(res, val);
 	}
-	const char * str = json_dumps(jarray, JSON_COMPACT);
-	NetMessage_setDataString(message, str);
-	free((void *)str);
-	json_decref(jarray);
 }
 
-void numbersHandler(Request * req, NetMessage * message) {
+void numbersHandler(Request * req, Response * res) {
 	int total = rand() % 100;
-	generateRandomNumbersJson(message, total, -100, 100);
+	Response_setItemsType(res, RES_NUMBERS);
+	generateRandomNumbers(res, total, -100, 100);
 }
 
-void bitsHandler(Request * req, NetMessage * message) {
+void bitsHandler(Request * req, Response * res) {
 	int total = rand() % 32 + 1;
-	generateRandomNumbersJson(message, total, 0, 1);
+	Response_setItemsType(res, RES_NUMBERS);
+	generateRandomNumbers(res, total, 0, 1);
 }
 
 static char * readFileContents(const char * fileName);
 
-void stringsHandler(Request * req, NetMessage * message) {
+void stringsHandler(Request * req, Response * res) {
 	const char * fileName = "./text.txt";
 	char * fcontent = readFileContents(fileName);
 	if (!fcontent) {
 		char msg[100] = "";
 		sprintf(msg, "Error: File `%s` not found", fileName);
-		NetMessage_setDataString(message, msg);
+		Response_setError(res, msg);
 		return;
 	}
-
-	json_t * jarray = json_array();
-
+	Response_setItemsType(res, RES_STRINGS);
 	char * str = fcontent;
 	const char s[2] = " ";
 	char * token = strtok(str, s);
 	while( token != NULL ) 
 	{
 		if (rand() % 2 == 0) {
-			json_array_append(jarray, json_string(token));
+			Response_addString(res, token);
 		}
 		token = strtok(NULL, s);
 	}
-
-	const char * strDump = json_dumps(jarray, JSON_COMPACT);
-	NetMessage_setDataString(message, strDump);
-	free((void *)strDump);
-	json_decref(jarray);
-
 	free(fcontent);
 }
 
-void strNumHandler(Request * req, NetMessage * message) {
+void strNumHandler(Request * req, Response * res) {
 	const char * fileName = "./text.txt";
 	char * fcontent = readFileContents(fileName);
 	if (!fcontent) {
 		char msg[100] = "";
 		sprintf(msg, "Error: File `%s` not found", fileName);
-		NetMessage_setDataString(message, msg);
+		Response_setError(res, msg);
 		return;
 	}
-
-	json_t * jarray = json_array();
+	Response_setItemsType(res, RES_STRINGS);
 
 	char * str = fcontent;
 	const char s[2] = " ";
@@ -79,20 +66,14 @@ void strNumHandler(Request * req, NetMessage * message) {
 	{
 		int r = rand() % 3;
 		if (r == 0) {
-			json_array_append(jarray, json_string(token));
+			Response_addString(res, token);
 		} else if (r == 1) {
 			char numbStr[10] = "0";
 			sprintf(numbStr, "%i", rand() % 200 - 100);
-			json_array_append(jarray, json_string(numbStr));
+			Response_addString(res, numbStr);
 		}
 		token = strtok(NULL, s);
 	}
-
-	const char * strDump = json_dumps(jarray, JSON_COMPACT);
-	NetMessage_setDataString(message, strDump);
-	free((void *)strDump);
-	json_decref(jarray);
-
 	free(fcontent);
 }
 

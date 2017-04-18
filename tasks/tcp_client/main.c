@@ -10,10 +10,10 @@
 
 #define BUFFER_LEN 10240
 
-void numbersHandler(Request * req, NetMessage * message);
-void bitsHandler(Request * req, NetMessage * message);
-void stringsHandler(Request * req, NetMessage * message);
-void strNumHandler(Request * req, NetMessage * message);
+void numbersHandler(Request * req, Response * res);
+void bitsHandler(Request * req, Response * res);
+void stringsHandler(Request * req, Response * res);
+void strNumHandler(Request * req, Response * res);
 
 static CommandHandler handlers[] = {
 	{ "numbers", numbersHandler},
@@ -68,8 +68,11 @@ int main(int argc, char * argv[]) {
             NetMessage_data(message));
 
 		Request req = parseRequest(NetMessage_data(message));
-		processRequest(&req, message, handlers, sizeof(handlers) / sizeof(handlers[0]));
-		
+        Response res;
+        Response_init(&res);
+		processRequest(&req, &res, handlers, sizeof(handlers) / sizeof(handlers[0]));
+        Response_toMessage(&res, message);
+		Response_cleanup(&res);
         // send data back
         if(!TcpClient_send(&client, message)) {
 			perror("send");
