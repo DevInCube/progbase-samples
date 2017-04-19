@@ -4,7 +4,7 @@
 		"-I./include",
 		"-I./../include",
 		"-c",
-		"-std=c11",
+		"-std=c++11",
 		"-Werror",
 		"-Wall",
 		"-fms-extensions"
