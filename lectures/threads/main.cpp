@@ -3,6 +3,8 @@
 #include <thread>
 #include <mutex>
 
+#include <graphics.h>
+
 #include <progbase.h>
 #include <progbase-cpp/console.h>
 

@@ -1,8 +1,8 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 	"clang.cflags": [
-		"-I./include",
-		"-I./../include",
+		"-Iinclude",
+		"-I../include",
 		"-c",
 		"-std=c++11",
 		"-Werror",
