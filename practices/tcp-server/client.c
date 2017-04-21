@@ -10,7 +10,10 @@
 
 #define BUFFER_LEN 10000
 
+// install: sudo apt-get install libssl-dev
+
 // TLS Protocol
+
 typedef struct Tls Tls;
 struct Tls {
     SSL_CTX * ssl_ctx;
