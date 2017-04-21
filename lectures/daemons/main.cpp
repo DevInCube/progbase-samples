@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <syslog.h>
 
+// tutorial: 
+//		http://shahmirj.com/blog/beginners-guide-to-creating-a-daemon-in-linux
 // read from syslog:
 // 		tail -n 10 /var/log/syslog
 
