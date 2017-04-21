@@ -3,7 +3,7 @@
 
 static inline void swap(double * a, double * b);
 
-void Graphics_drawPixel(Graphics * self, double x, double y, ConsoleColor color) {
+void Graphics_drawPixel(Graphics * self, Vec2D pos, ConsoleColor color) {
     // @todo
 }
 
@@ -25,7 +25,10 @@ void Graphics_drawLine(Graphics * self, Vec2D start, Vec2D end, ConsoleColor col
     double dErr = dy;
     double x = x0;
     double y = y0;
-    Graphics_drawPixel(self, steep ? y : x, steep ? x : y, color);
+    Graphics_drawPixel(
+        self, 
+        (Vec2D){ steep ? y : x, steep ? x : y },
+        color);
 
     int xstep = (x0 < x1) ? 1 : -1;
     int ystep = (y0 < y1) ? 1 : -1;
@@ -36,7 +39,10 @@ void Graphics_drawLine(Graphics * self, Vec2D start, Vec2D end, ConsoleColor col
             y += ystep;
             error -= dx;
         }
-        Graphics_drawPixel(self, steep ? y : x, steep ? x : y, color);
+        Graphics_drawPixel(
+            self, 
+            (Vec2D){ steep ? y : x, steep ? x : y },
+            color);
     }
 }
 
