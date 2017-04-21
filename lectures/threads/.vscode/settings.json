@@ -1,12 +1,11 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"clang.cflags": [
+	"clang.cxxflags": [
 		"-Iinclude",
 		"-I../include",
 		"-c",
 		"-std=c++11",
 		"-Werror",
-		"-Wall",
-		"-fms-extensions"
+		"-Wall"
 	]
 }

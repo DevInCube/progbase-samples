@@ -3,10 +3,10 @@
 #include <thread>
 #include <mutex>
 
-#include <graphics.h>
-
 #include <progbase.h>
 #include <progbase-cpp/console.h>
+
+#include <graphics.h>
 
 using namespace std;
 using namespace progbase::console;
@@ -35,7 +35,8 @@ void threadB() {
 
 int main(void) {
 	Console::clear();
-	// Console::setCursorPosition(10, 10);
+	Graphics_drawCircle(NULL, (Vec2D){40, 12}, 10, CursorAttributes::BG_CYAN);
+	Console::setCursorPosition(0, 0);
 	// Console::setCursorAttribute(CursorAttributes::BG_CYAN);
 	// Console::setCursorAttribute(CursorAttributes::FG_BLACK);
 	// cout << "*" << endl;
@@ -49,5 +50,6 @@ int main(void) {
 	a.detach();
 	b.detach();
 	Console::reset();
+	cout << endl;
 	return 0;
 }

@@ -1,10 +1,15 @@
 #include <math.h>
+
+#include <progbase-cpp/console.h>
+
 #include <graphics.h>
 
 static inline void swap(double * a, double * b);
 
 void Graphics_drawPixel(Graphics * self, Vec2D pos, ConsoleColor color) {
-    // @todo
+    progbase::console::Console::setCursorPosition(pos.y, pos.x);
+    progbase::console::Console::setCursorAttribute(color);
+    putchar(' ');
 }
 
 void Graphics_drawLine(Graphics * self, Vec2D start, Vec2D end, ConsoleColor color) {
@@ -43,6 +48,37 @@ void Graphics_drawLine(Graphics * self, Vec2D start, Vec2D end, ConsoleColor col
             self, 
             (Vec2D){ steep ? y : x, steep ? x : y },
             color);
+    }
+}
+
+void Graphics_drawCircle(Graphics * self, Vec2D pos, double radius, ConsoleColor color) {
+    double x0 = pos.x;
+    double y0 = pos.y;
+    double x = radius;
+    double y = 0;
+    double err = 0;
+
+    while (x >= y)
+    {
+        Graphics_drawPixel(self, (Vec2D){x0 + x, y0 + y}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 + y, y0 + x}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 - y, y0 + x}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 - x, y0 + y}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 - x, y0 - y}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 - y, y0 - x}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 + y, y0 - x}, color);
+        Graphics_drawPixel(self, (Vec2D){x0 + x, y0 - y}, color);
+
+        if (err <= 0)
+        {
+            y += 1;
+            err += 2*y + 1;
+        }
+        if (err > 0)
+        {
+            x -= 1;
+            err -= 2*x + 1;
+        }
     }
 }
 
