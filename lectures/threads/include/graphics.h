@@ -2,12 +2,14 @@
 
 typedef struct Graphics Graphics;
 
-typedef struct {
-	double x, y;
-} Vec2D;
+typedef struct Vec2D Vec2D;
+struct Vec2D {
+	double x;
+	double y;
+};
 
-typedef enum {
-
+typedef enum ConsoleColor {
+	// @todo
 } ConsoleColor;
 
 void Graphics_drawPixel(Graphics * self, double x, double y, ConsoleColor color);
