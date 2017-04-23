@@ -2,32 +2,15 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <openssl/ssl.h>
-
 #include <progbase.h>
 #include <progbase/net.h>
 #include <progbase/console.h>
 
-#define BUFFER_LEN 10000
-
-// install: sudo apt-get install libssl-dev
-
-// TLS Protocol
-
-typedef struct Tls Tls;
-struct Tls {
-    SSL_CTX * ssl_ctx;
-    SSL * conn;
-};
-
-Tls * Tls_init(Tls * self);
-bool Tls_connect(Tls * self, TcpClient * client);
-bool Tls_send(Tls * self, NetMessage * message);
-bool Tls_receive(Tls * self, NetMessage * message);
-void Tls_close(Tls * self);
+#define BUFFER_LEN 1000
 
 int main(void) {
-	TcpClient * client = TcpClient_init(&(TcpClient){});
+    // create TCP client
+	TcpClient * tcpClient = TcpClient_init(&(TcpClient){});
     const char * serverHostname = "api.sunrise-sunset.org";
     char ipv4[20] = "";
     if (!Ip_resolveHostname(ipv4, serverHostname)) {
@@ -43,17 +26,23 @@ int main(void) {
         (char[BUFFER_LEN]){},  // array on stack 
         BUFFER_LEN); 
     
-    if (!TcpClient_connect(client, serverAddress)) {
+    // initialize SSL
+    Ssl * ssl = Ssl_init(&(Ssl){});
+    // create secure connection
+    if (!TcpClient_connectSecure(tcpClient, serverAddress, ssl)) {
         perror("tcp connect");
         return 1;
     }
+    printf(">> Connected to server (%s:%i)\n",
+        IpAddress_address(serverAddress),
+        IpAddress_port(serverAddress));
     //
     // create secure connection
-    Tls * tls = Tls_init(&(Tls){});
-    if(!Tls_connect(tls, client)) {
-        perror("tls connect");
-        return 1;
-    }
+    // Ssl * sslClient = Ssl_init(&(Ssl){});
+    // if(!Ssl_connect(sslClient, tcpClient)) {
+    //     perror("sslClient connect");
+    //     return 1;
+    // }
 
     //
     // setup message object
@@ -73,16 +62,16 @@ int main(void) {
         serverHostname,
         message->buffer);
 
-    if(!Tls_send(tls, message)) {
-		perror("send");
+    if(!TcpClient_send(tcpClient, message)) {
+        perror("send");
 		return 1;
-	}
+    }
     //
     // receive response from server
     // use loop to receive big data buffers
     // the end of message if determined by 0 data length
     while (1) {
-        if(!Tls_receive(tls, message)) {
+        if(!TcpClient_receive(tcpClient, message)) {
             perror("recv");
             return 1;
         }
@@ -96,54 +85,10 @@ int main(void) {
         // break;  // @todo why?
     }
     //
-    // close secure connection
-    Tls_close(tls);
-    TcpClient_close(client);
+    // close connection
+    TcpClient_close(tcpClient);
+    //
+    // cleanup SSL
+    Ssl_cleanup(ssl);
 	return 0;
-}
-
-
-// TLS Protocol
-
-Tls * Tls_init(Tls * self) {
-    self->conn = NULL;
-    SSL_load_error_strings();
-    SSL_library_init();
-    SSL_CTX *ssl_ctx = SSL_CTX_new(SSLv23_client_method());
-    self->ssl_ctx = ssl_ctx;
-    return self;
-}
-
-bool Tls_connect(Tls * self, TcpClient * client) {
-    //
-    // create an SSL connection and attach it to the socket
-    self->conn = SSL_new(self->ssl_ctx);
-    SSL_set_fd(self->conn, client->socket);
-    //
-    // perform the SSL/TLS handshake with the server - when on the
-    // server side, this would use SSL_accept()
-    return SSL_connect(self->conn);
-}
-
-bool Tls_send(Tls * self, NetMessage * message) {
-    // now proceed with HTTP traffic, using SSL_read instead of recv() and
-    // SSL_write instead of send(), and SSL_shutdown/SSL_free before close()
-    int bytes = SSL_write(self->conn, (void *)message->buffer, message->dataLength);
-    message->sentDataLength = bytes;
-    return bytes >= 0;
-}
-
-bool Tls_receive(Tls * self, NetMessage * message) {
-    // SSL_read
-    int bytes = SSL_read(self->conn, message->buffer, message->bufferLength);
-    if (bytes < message->bufferLength) {
-        message->buffer[bytes] = '\0';  // nul-terminate string
-    }
-    message->dataLength = bytes;
-    return bytes >= 0;
-}
-
-void Tls_close(Tls * self) {
-    SSL_shutdown(self->conn);
-    SSL_free(self->conn);
 }
