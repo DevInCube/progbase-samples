@@ -1,9 +1,11 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"clang.cxxflags": [
-		"-I./include",
+	"clang.cflags": [
+		"-std=c11",
+		"-Wall",
+		"-Werror",
 		"-I../include",
-		"-std=c++11",
-		"-Wc++11-extensions"
+		"-Iinclude",
+		"-I./"
 	]
 }
