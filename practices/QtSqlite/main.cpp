@@ -13,6 +13,7 @@ using namespace std;
 int main(void)
 {
     const QString DRIVER("QSQLITE");
+
     if(!QSqlDatabase::isDriverAvailable(DRIVER)) {
         qDebug() << "sqlite not available";
         return 1;
@@ -38,7 +39,7 @@ int main(void)
     }
     QSqlQuery("INSERT INTO people values (2, 'TEXT-2')");
 
-    query = QSqlQuery("SELECT * FROM people");
+    query = QSqlQuery("SELECT id, name FROM people");
     if(!query.exec()){
         qDebug() << "ERROR: " << query.lastError().text();
     }
@@ -61,7 +62,7 @@ int main(void)
 
     qDebug() << "After remove:";
 
-    query = QSqlQuery("SELECT * FROM people");
+    query = QSqlQuery("SELECT id, name FROM people");
     query.exec();
     while(query.next())
     {
