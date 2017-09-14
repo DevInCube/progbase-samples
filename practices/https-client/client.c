@@ -11,7 +11,7 @@
 int main(void) {
     // create TCP client
 	TcpClient * tcpClient = TcpClient_init(&(TcpClient){});
-    const char * serverHostname = "api.sunrise-sunset.org";
+    const char * serverHostname = "country.register.gov.uk";
     char ipv4[20] = "";
     if (!Ip_resolveHostname(ipv4, serverHostname)) {
         perror("resolve address");
@@ -46,7 +46,7 @@ int main(void) {
 
     //
     // setup message object
-    const char * path = "/json?lat=36.7201600&lng=-4.4203400";
+    const char * path = "/records.json";
     const char * httpVersion = "1.0";  // response differs in 1.1
     char httpWebRequest[256] = "";
     sprintf(httpWebRequest, 
