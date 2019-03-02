@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8.9)
 
 project(a.out)
 
-include_directories(${CMAKE_SOURCE_DIR}/libmylist)
-link_directories(${CMAKE_SOURCE_DIR}/libmylist/build)
+include_directories(${CMAKE_SOURCE_DIR}/../libmylist)
+link_directories(${CMAKE_SOURCE_DIR}/../libmylist/build)
 file(GLOB SOURCES "*.c")
 
 add_executable(${PROJECT_NAME} ${SOURCES})
