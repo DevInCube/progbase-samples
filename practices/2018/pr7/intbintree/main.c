@@ -32,7 +32,7 @@ static void printValueOnLevel(BinTree * node, char pos, int lvl)
     if (node == NULL) { 
         printf("(null)\n"); 
     } else { 
-        printf("%i\n", node->key); 
+        printf("%i\n", node->value); 
     }
 }
 static void printNode(BinTree * node, char pos, int lvl)

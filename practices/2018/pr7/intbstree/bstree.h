@@ -15,7 +15,7 @@ void BSTree_deinit(BSTree * self);
 
 size_t BSTree_size     (BSTree * self);
 
-void   BSTree_insert   (BSTree * self, int key, int value);
+void   BSTree_insert   (BSTree * self, int value);
 bool   BSTree_lookup   (BSTree * self, int key);
 int BSTree_search   (BSTree * self, int key);
 int BSTree_delete   (BSTree * self, int key);

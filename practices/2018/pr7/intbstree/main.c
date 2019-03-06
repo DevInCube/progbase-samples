@@ -20,7 +20,7 @@ int main()
     BSTree_init(&bst);
     for (int i = 0; i < len; i++)
     {
-        BSTree_insert(&bst, nums[i], nums[i]);
+        BSTree_insert(&bst, nums[i]);
     }
     printBinTree(bst.root);
     // @todo free all
