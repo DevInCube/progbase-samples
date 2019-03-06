@@ -15,7 +15,7 @@
     StrStrMap_add(&stringsEn, "MainMenu", "Main menu");
     // ...
     ```
-    Створити глобальний вказівник на **StrStrMap** `strings` і присвоїти йому адресу `stringsEn`. 
+    Створити глобальний вказівник на **StrStrMap** `strings` і присвоїти йому адресу `stringsEn`.   
     Видалити глобальні рядки, а замість них у коді використовувати отримання рядка зі словника `strings`:
     ```c
     const char * appNameValue = StrStrMap_get(strings, "AppName");
