@@ -8,8 +8,8 @@
     static const SubMenu2 = "Sub menu 2";
     static const InvalidInputError = "Invalid input";
     ```
-    Реалізувати модуль [**StrStrMap**][strstrmap-int] і підключити його в `main` модуль. Створити глобальний екземпляр **StrStrMap** `stringsEn`.  
-    На початку функції `main` ініціалізувати створений глобальний словник і занести у нього всі глобальні рядки:
+    Реалізувати модуль [**StrStrMap**][strstrmap-int] і підключити його в `main` модуль.  
+    Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsEn`, занести у нього всі глобальні рядки:
     ```c
     StrStrMap_add(&stringsEn, "AppName", "My app");
     StrStrMap_add(&stringsEn, "MainMenu", "Main menu");
@@ -20,6 +20,13 @@
     ```c
     const char * appNameValue = StrStrMap_get(strings, "AppName");
     ```
+    Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsUa`, занести у нього такі ж ключі, але зі значеннями, що є транслітом :
+    ```c
+    StrStrMap_add(&stringsEn, "AppName", "Moya programma");
+    StrStrMap_add(&stringsEn, "MainMenu", "Holovne menu");
+    // ...
+    ```
+    Переприсвоїти `strings` на адресу `stringsEn` і перевірити роботу програми.
     
     
     [strstrmap-int]: https://docs.google.com/presentation/d/18PQX143prl8iTkqzjQM7h1_GZQ1swnf17oQ0TLarKpw/edit#slide=id.g50ad2596a1_4_0
