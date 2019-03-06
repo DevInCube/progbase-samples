@@ -20,7 +20,7 @@
     ```c
     const char * appNameValue = StrStrMap_get(strings, "AppName");
     ```
-    Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsUa`, занести у нього такі ж ключі, але зі значеннями, що є транслітом :
+    Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsUa`, занести у нього такі ж ключі, але зі значеннями, що є транслітом української мови:
     ```c
     StrStrMap_add(&stringsEn, "AppName", "Moya programma");
     StrStrMap_add(&stringsEn, "MainMenu", "Holovne menu");
