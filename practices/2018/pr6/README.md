@@ -2,11 +2,11 @@
     В програмі виводити її назву, пункти меню мають підписи англійською мовою.  
     Винести всі рядки, що виводяться у консоль у глобальні статичні змінні, наприклад:
     ```c
-    static const AppName = "My app";
-    static const MainMenu = "Main menu";
-    static const SubMenu1 = "Sub menu 1";
-    static const SubMenu2 = "Sub menu 2";
-    static const InvalidInputError = "Invalid input";
+    static const char * AppName = "My app";
+    static const char * MainMenu = "Main menu";
+    static const char * SubMenu1 = "Sub menu 1";
+    static const char * SubMenu2 = "Sub menu 2";
+    static const char * InvalidInputError = "Invalid input";
     
     int main()
     {
