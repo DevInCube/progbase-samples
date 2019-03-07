@@ -26,7 +26,9 @@
     Реалізувати модуль [**StrStrMap**][strstrmap-int] і підключити його в `main` модуль.  
     Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsEn`, занести у нього всі глобальні рядки:
     ```c
-    static StrStrMap * strings;
+    static const char * AppName = "My app";
+    static const char * MainMenu = "Main menu";
+    // ...
     
     int main()
     {
