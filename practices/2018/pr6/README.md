@@ -26,9 +26,19 @@
     Реалізувати модуль [**StrStrMap**][strstrmap-int] і підключити його в `main` модуль.  
     Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsEn`, занести у нього всі глобальні рядки:
     ```c
-    StrStrMap_add(&stringsEn, "AppName", "My app");
-    StrStrMap_add(&stringsEn, "MainMenu", "Main menu");
-    // ...
+    static StrStrMap * strings;
+    
+    int main()
+    {
+        StrStrMap stringsEn;
+        StrStrMap_init(&stringsEn);
+        StrStrMap_add(&stringsEn, "AppName", "My app");
+        StrStrMap_add(&stringsEn, "MainMenu", "Main menu");
+        // @todo init and fill stringsEn here
+        // ...
+        // @todo deinit stringsEn here
+        return 0;
+    }
     ```
     Створити глобальний вказівник на **StrStrMap** `strings` і присвоїти йому адресу `stringsEn`.   
     Видалити глобальні рядки, а замість них у коді використовувати отримання рядка зі словника `strings`:
