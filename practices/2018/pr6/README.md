@@ -22,11 +22,11 @@
     ```
     Створити та ініціалізувати на початку функції `main` екземпляр **StrStrMap** `stringsUa`, занести у нього такі ж ключі, але зі значеннями, що є транслітом української мови:
     ```c
-    StrStrMap_add(&stringsEn, "AppName", "Moya programma");
-    StrStrMap_add(&stringsEn, "MainMenu", "Holovne menu");
+    StrStrMap_add(&stringsUa, "AppName", "Moya programma");
+    StrStrMap_add(&stringsUa, "MainMenu", "Holovne menu");
     // ...
     ```
-    Переприсвоїти `strings` на адресу `stringsEn` і перевірити роботу програми.
+    Переприсвоїти `strings` на адресу `stringsUa` і перевірити роботу програми.
     
     
     [strstrmap-int]: https://docs.google.com/presentation/d/18PQX143prl8iTkqzjQM7h1_GZQ1swnf17oQ0TLarKpw/edit#slide=id.g50ad2596a1_4_0
