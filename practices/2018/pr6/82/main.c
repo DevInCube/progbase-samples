@@ -30,7 +30,7 @@ int main()
     StrStrMap_add(&ukrainianEn, "type", "Konsolb");
     StrStrMap_add(&ukrainianEn, "file", "a.out");
 
-    strings = &ukrainianEn;
+    strings = &stringsEn;
 
     printf("=======%s=======\n", StrStrMap_get(strings, "appname"));
     printf("(%s): by %s\n", StrStrMap_get(strings, "version"), StrStrMap_get(strings, "author"));
