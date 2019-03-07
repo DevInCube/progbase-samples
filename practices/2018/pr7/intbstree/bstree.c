@@ -10,54 +10,66 @@ void BSTree_init(BSTree *self)
 }
 void BSTree_deinit(BSTree *self) {}
 
-static void insertNode(BinTree *node, int key, int value)
-{
-    if (key == node->key)
-    {
-        fprintf(stderr, "Key %i already exists\n", key);
-        abort();
-    }
-    if (key < node->key)
-    {
-        if (node->left == NULL)
-        {
-            node->left = BinTree_alloc(key); // + value
-        }
-        else
-        {
-            insertNode(node->left, key, value);
-        }
-    }
-    else
-    { // key > node->key
-        if (node->right == NULL)
-        {
-            node->right = BinTree_alloc(key); // + value
-        }
-        else
-        {
-            insertNode(node->right, key, value);
-        }
-    }
-}
-static void insertNode(BinTree *node, int key, int value);
+
+static void insertNode(BinTree *node, BinTree * newNode);
 
 void BSTree_insert(BSTree *self, int value)
 {
     self->size += 1; // we add or abort, increase size
     int key = value; // getKey(value) for other value types
+    BinTree * newNode = BinTree_alloc(key/*, value*/);
     if (self->root == NULL)
     { // if tree is empty - create root
-        self->root = BinTree_alloc(key/*, value*/);
+        self->root = newNode;
     }
     else
-    {
-        insertNode(self->root, key, value); // enter recursion
+    { 
+        insertNode(self->root, newNode); // enter recursion
     }
 }
+
+static void insertNode(BinTree *node, BinTree * newNode)
+{
+    if (newNode->key == node->key)
+    {
+        fprintf(stderr, "Key %i already exists\n", newNode->key);
+        abort();
+    }
+    if (newNode->key < node->key)
+    {
+        if (node->left == NULL)
+        {
+            node->left = newNode;
+        }
+        else
+        {
+            insertNode(node->left, newNode);
+        }
+    }
+    else
+    { // newNode->key > node->key
+        if (node->right == NULL)
+        {
+            node->right = newNode;
+        }
+        else
+        {
+            insertNode(node->right, newNode);
+        }
+    }
+}
+
+static bool lookupKey(BinTree *self, int key)
+{
+    if (self == NULL) return false; 
+    if (key < self->key) return lookupKey(self->left, key);
+    else if (key > self->key) return lookupKey(self->right, key);
+    return true; // key == self->key
+}
+
 bool BSTree_lookup(BSTree *self, int key)
 {
-    return false;
+    return lookupKey(self->root, key);
 }
 int BSTree_search(BSTree *self, int key)
 {

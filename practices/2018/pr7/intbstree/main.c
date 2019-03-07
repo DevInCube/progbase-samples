@@ -5,6 +5,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
+#include <assert.h>
 
 #include "intbintree.h"
 #include "bstree.h"
@@ -21,6 +22,10 @@ int main()
     for (int i = 0; i < len; i++)
     {
         BSTree_insert(&bst, nums[i]);
+    }
+    for (int i = 0; i < len; i++)
+    {
+        assert(BSTree_lookup(&bst, nums[i]));
     }
     printBinTree(bst.root);
     // @todo free all
