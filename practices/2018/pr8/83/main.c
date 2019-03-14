@@ -103,72 +103,79 @@ int main()
     return 0;
 }
 
-typedef BinTree * BinTreeLink;
+typedef BinTree *BinTreeLink;
 
-BinTree * BinTreeLink_child(BinTreeLink * self) { return *self; }
-void BinTreeLink_setChild(BinTreeLink * self, BinTree * child) { *self = child; }
+BinTree *BinTreeLink_child(BinTreeLink *self) { return *self; }
+void BinTreeLink_setChild(BinTreeLink *self, BinTree *child) { *self = child; }
 // preprocessor macros
-#define BinTreeLink_create(NODEPTR)      &(NODEPTR)
+#define BinTreeLink_create(NODEPTR) &(NODEPTR)
 
-static BinTreeLink * findMostLeftMissingNodeParentLink(BinTreeLink * parentToChildLink)
+static BinTreeLink *findMostLeftMissingNodeParentLink(BinTreeLink *parentToChildLink)
 {
-    BinTree * childNode = BinTreeLink_child(parentToChildLink);
-    if (childNode->left == NULL) return parentToChildLink;
-    BinTreeLink * leftChildLink = BinTreeLink_create(childNode->left);
+    BinTree *childNode = BinTreeLink_child(parentToChildLink);
+    if (childNode->left == NULL)
+        return parentToChildLink;
+    BinTreeLink *leftChildLink = BinTreeLink_create(childNode->left);
     return findMostLeftMissingNodeParentLink(leftChildLink);
 }
 
-static Student deleteKey(BinTreeLink * parentToChildLink, int key)
+static void modifyTreeOnDelete(BinTreeLink *parentToChildLink, BinTree *node)
 {
-    BinTree * node = *parentToChildLink;
+    BinTree *replacementNode = NULL; // to place this on node's position
+    if (node->left == NULL && node->right == NULL)
+    {
+        // case A: no children
+        // replacementNode = NULL;
+    }
+    else if (node->left == NULL || node->right == NULL)
+    {
+        // case B: one child
+        BinTree *child = node->left != NULL
+            ? node->left
+            : node->right;
+        //
+        replacementNode = child;
+    }
+    else
+    {
+        // case C: two children
+        BinTreeLink *rightChildLink = BinTreeLink_create(node->right);
+        BinTreeLink *mostLeftMissingNodeParentLink = findMostLeftMissingNodeParentLink(rightChildLink);
+        BinTree *mostLeftParent = BinTreeLink_child(mostLeftMissingNodeParentLink);
+        // move most left parent's right child to parent's position
+        BinTreeLink_setChild(mostLeftMissingNodeParentLink, mostLeftParent->right);
+        // move most left parent to node's position
+        mostLeftParent->left = node->left;
+        mostLeftParent->right = node->right;
+        //
+        replacementNode = mostLeftParent;
+    }
+    BinTreeLink_setChild(parentToChildLink, replacementNode);
+}
+
+static Student deleteNode(BinTreeLink *parentToChildLink, BinTree * node)
+{
+    Student nodeValue = node->value; // temporary value copy
+    modifyTreeOnDelete(parentToChildLink, node);
+    BinTree_free(node);  // release allocated memory
+    return nodeValue;  // return value of removed node
+}
+
+static Student deleteKey(BinTreeLink *parentToChildLink, int key)
+{
+    BinTree *node = *parentToChildLink;
     if (node == NULL)
     {
         fprintf(stderr, "No value with such key `%i`\n", key);
         abort();
     }
-    if (node->key == key)
-    {
-        Student nodeValue = node->value;  // temporary copy
-        BinTree * replacementNode = NULL;  // to place this on node's position
-        if (node->left == NULL && node->right == NULL)
-        {
-            // case A: no children
-            // replacementNode = NULL;
-        }
-        else if (node->left == NULL || node->right == NULL)  
-        {
-            // case B: one child
-            BinTree * child = node->left != NULL 
-                ? node->left 
-                : node->right;
-            //
-            replacementNode = child;
-        }
-        else  
-        {
-            // case C: two children
-            BinTreeLink * rightChildLink = BinTreeLink_create(node->right);
-            BinTreeLink * mostLeftMissingNodeParentLink = findMostLeftMissingNodeParentLink(rightChildLink);
-            BinTree * mostLeftParent = BinTreeLink_child(mostLeftMissingNodeParentLink);
-            // move most left parent's right child to parent's position
-            BinTreeLink_setChild(mostLeftMissingNodeParentLink, mostLeftParent->right);
-            // move most left parent to node's position
-            mostLeftParent->left = node->left;
-            mostLeftParent->right = node->right;
-            //
-            replacementNode = mostLeftParent;
-        }
-        BinTreeLink_setChild(parentToChildLink, replacementNode);
-        BinTree_free(node);
-        return nodeValue;
-    }
+    if (key == node->key)
+        return deleteNode(parentToChildLink, node);
     if (key < node->key)
         return deleteKey(BinTreeLink_create(node->left), key);
     if (key > node->key)
         return deleteKey(BinTreeLink_create(node->right), key);
 }
-
-
 
 Student BSTree_delete(BSTree *self, int key)
 {
