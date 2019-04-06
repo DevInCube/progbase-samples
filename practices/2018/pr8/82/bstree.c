@@ -101,6 +101,7 @@ static void modifyTreeOnDelete(BinTree * node, BinTree * parent)
     {
         // case B
         BinTree * child = (node->left != NULL) ? node->left : node->right;
+        //
         if (parent->left == node) parent->left = child;
         else parent->right = child;
     }
@@ -113,9 +114,9 @@ static void modifyTreeOnDelete(BinTree * node, BinTree * parent)
         BinTree * newMin = BinTree_alloc(deletedValue);
         newMin->left = node->left;
         newMin->right = node->right;
+        //
         if (parent->left == node) parent->left = minNode;
         else parent->right = minNode;
-        
     }
 }
 
